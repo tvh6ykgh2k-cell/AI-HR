@@ -79,12 +79,12 @@ export default function SettingsPage() {
           <div>
             <label className="text-sm text-mist block mb-1">文本模型</label>
             <input type="text" value={store.model} onChange={(e) => store.save({ model: e.target.value })}
-              placeholder="Agnes 2.0 Flash" className="input-field w-full" />
+              placeholder="agnes-2.0-flash" className="input-field w-full" />
           </div>
           <div>
             <label className="text-sm text-mist block mb-1">图片模型（JD 截图识别）</label>
             <input type="text" value={store.visionModel} onChange={(e) => store.save({ visionModel: e.target.value })}
-              placeholder="Agnes Image 2.1 Flash" className="input-field w-full" />
+              placeholder="agnes-image-2.1-flash" className="input-field w-full" />
           </div>
           <div className="flex gap-3">
             <button onClick={handleTest} disabled={testing} className="btn-secondary">{testing ? '⏳ 测试中...' : '🔌 测试连接'}</button>

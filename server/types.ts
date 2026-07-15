@@ -25,8 +25,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
     technicalDepth: 3,
   },
   apiKey: '',
-  model: 'Agnes 2.0 Flash',
-  visionModel: 'Agnes Image 2.1 Flash',
+  model: 'agnes-2.0-flash',
+  visionModel: 'agnes-image-2.1-flash',
 };
 
 // ========== JD ==========

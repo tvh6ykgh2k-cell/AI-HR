@@ -79,7 +79,6 @@ export default function InterviewPage() {
     setInputText('');
   }, [isStreaming, store, jdContext, starCoverage, messages]);
 
-  // Phase 1: JD Input
   if (phase === 'input') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4">
@@ -101,7 +100,6 @@ export default function InterviewPage() {
     );
   }
 
-  // Phase 2: Chat
   return (
     <div className="h-screen flex flex-col">
       <div className="bg-[#0A0C12] border-b px-4 py-3 flex items-center justify-between shrink-0">
@@ -128,12 +126,9 @@ export default function InterviewPage() {
       </div>
 
       <div className="bg-[#0A0C12] border-t px-4 py-3 flex items-center gap-3 shrink-0">
-        <input
-          value={inputText} onChange={(e) => setInputText(e.target.value)}
+        <input value={inputText} onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(inputText); } }}
-          placeholder="输入你的回答... (Enter 发送)"
-          className="flex-1 input-field" disabled={isStreaming}
-        />
+          placeholder="输入你的回答... (Enter 发送)" className="flex-1 input-field" disabled={isStreaming} />
         <VoiceButton onResult={(text) => setInputText(p => p + text)} />
         <button onClick={() => sendMessage(inputText)} disabled={!inputText.trim() || isStreaming} className="btn-primary !px-4">发送</button>
       </div>

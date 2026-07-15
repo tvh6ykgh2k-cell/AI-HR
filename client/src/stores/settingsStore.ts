@@ -14,6 +14,7 @@ interface SettingsState {
   sliders: SliderSettings;
   apiKey: string;
   model: string;
+  visionModel: string;
   obsidianPath: string;
   loading: boolean;
   error: string | null;
@@ -25,7 +26,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   personality: '',
   sliders: { followUpDepth: 3, questionPace: 3, strictness: 3, hintFrequency: 3, technicalDepth: 3 },
   apiKey: '',
-  model: '',
+  model: 'Agnes 2.0 Flash',
+  visionModel: 'Agnes Image 2.1 Flash',
   obsidianPath: '',
   loading: false,
   error: null,
@@ -39,6 +41,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         sliders: data.sliders,
         apiKey: data.apiKey,
         model: data.model,
+        visionModel: data.visionModel,
         loading: false,
         error: null,
       });
@@ -57,6 +60,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         sliders: updated.sliders,
         apiKey: updated.apiKey,
         model: updated.model,
+        visionModel: updated.visionModel,
       });
       set({ ...partial, loading: false, error: null });
     } catch (err: any) {

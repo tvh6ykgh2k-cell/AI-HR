@@ -11,7 +11,8 @@ export interface AppSettings {
   personality: string;
   sliders: SliderSettings;
   apiKey: string;           // 覆盖 .env 的值，为空则使用 env
-  model: string;
+  model: string;            // 文本对话模型
+  visionModel: string;      // 图片识别模型
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -24,7 +25,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
     technicalDepth: 3,
   },
   apiKey: '',
-  model: '',
+  model: 'Agnes 2.0 Flash',
+  visionModel: 'Agnes Image 2.1 Flash',
 };
 
 // ========== JD ==========

@@ -125,7 +125,8 @@ export async function recognizeJD(
   });
 
   if (!response.ok) {
-    throw new Error(`JD recognition failed: ${response.status}`);
+    const errText = await response.text();
+    throw new Error(`JD recognition failed: ${response.status} — ${errText}`);
   }
 
   const data = (await response.json()) as any;
@@ -203,7 +204,8 @@ ${resumeSection}
   });
 
   if (!response.ok) {
-    throw new Error(`Prep generation failed: ${response.status}`);
+    const prepErr = await response.text();
+    throw new Error(`Prep generation failed: ${response.status} — ${prepErr}`);
   }
 
   const data = (await response.json()) as any;
@@ -255,7 +257,8 @@ export async function scoreStar(
   });
 
   if (!response.ok) {
-    throw new Error(`STAR scoring failed: ${response.status}`);
+    const starErr = await response.text();
+    throw new Error(`STAR scoring failed: ${response.status} — ${starErr}`);
   }
 
   const data = (await response.json()) as any;
@@ -295,7 +298,8 @@ ${sessionContent}
   });
 
   if (!response.ok) {
-    throw new Error(`Summary generation failed: ${response.status}`);
+    const sumErr = await response.text();
+    throw new Error(`Summary generation failed: ${response.status} — ${sumErr}`);
   }
 
   const data = (await response.json()) as any;

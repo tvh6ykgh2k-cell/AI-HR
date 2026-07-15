@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { serve } from '@hono/node-server';
+import { settingsRoute } from './routes/settings.js';
 
 const app = new Hono();
 
@@ -13,6 +14,8 @@ app.use('/*', cors({
 app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+app.route('/api/settings', settingsRoute);
 
 const port = 3001;
 console.log(`Server running on http://localhost:${port}`);

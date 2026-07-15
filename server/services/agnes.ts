@@ -7,8 +7,7 @@ function getApiKey(overrideKey?: string): string {
   return overrideKey || API_KEY;
 }
 
-const VISION_MODEL = 'agnes-vision';
-const CHAT_MODEL = 'agnes-chat';
+// Model is set by user in settings page; empty = use API default
 
 interface SendChatOptions {
   stream?: boolean;
@@ -22,7 +21,7 @@ export async function* sendChat(
   options: SendChatOptions = {}
 ): AsyncGenerator<string> {
   const apiKey = getApiKey(options.apiKeyOverride);
-  const model = options.modelOverride || CHAT_MODEL;
+  const model = options.modelOverride || '';
 
   const response = await fetch(`${BASE_URL}/chat/completions`, {
     method: 'POST',
@@ -81,7 +80,8 @@ export async function* sendChat(
 // JD recognition from screenshot (vision model)
 export async function recognizeJD(
   imageBase64: string,
-  apiKeyOverride?: string
+  apiKeyOverride?: string,
+  modelOverride?: string
 ): Promise<string> {
   const apiKey = getApiKey(apiKeyOverride);
 
@@ -92,7 +92,7 @@ export async function recognizeJD(
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: VISION_MODEL,
+      model: modelOverride || '',
       messages: [
         {
           role: 'user',
@@ -136,7 +136,8 @@ export async function recognizeJD(
 export async function generatePrep(
   jdText: string,
   resumeText?: string,
-  apiKeyOverride?: string
+  apiKeyOverride?: string,
+  modelOverride?: string
 ): Promise<PrepDocument> {
   const apiKey = getApiKey(apiKeyOverride);
 
@@ -195,7 +196,7 @@ ${resumeSection}
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: CHAT_MODEL,
+      model: modelOverride || '',
       messages: [{ role: 'user', content: prompt }],
       stream: false,
     }),
@@ -215,7 +216,9 @@ ${resumeSection}
 export async function scoreStar(
   question: string,
   answer: string,
-  jdContext: string
+  jdContext: string,
+  apiKeyOverride?: string,
+  modelOverride?: string
 ): Promise<StarScore> {
   const prompt = `评估以下面试回答的 STAR 结构完整性：
 
@@ -242,10 +245,10 @@ export async function scoreStar(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${getApiKey()}`,
+      'Authorization': `Bearer ${getApiKey(apiKeyOverride)}`,
     },
     body: JSON.stringify({
-      model: CHAT_MODEL,
+      model: modelOverride || '',
       messages: [{ role: 'user', content: prompt }],
       stream: false,
     }),
@@ -264,7 +267,8 @@ export async function scoreStar(
 // Generate interview summary
 export async function generateSummary(
   sessionContent: string,
-  apiKeyOverride?: string
+  apiKeyOverride?: string,
+  modelOverride?: string
 ): Promise<string> {
   const apiKey = getApiKey(apiKeyOverride);
   const prompt = `以下是完整的面试记录。请生成面试总结：
@@ -284,7 +288,7 @@ ${sessionContent}
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: CHAT_MODEL,
+      model: modelOverride || '',
       messages: [{ role: 'user', content: prompt }],
       stream: false,
     }),

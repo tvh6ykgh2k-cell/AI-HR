@@ -9,7 +9,7 @@ prepRoute.post('/generate', async (c) => {
   try {
     const { jdText, resumeText } = await c.req.json<PrepGenerateRequest>();
     const settings = await readSettings();
-    const prepDoc = await generatePrep(jdText, resumeText, settings.apiKey || undefined);
+    const prepDoc = await generatePrep(jdText, resumeText, settings.apiKey || undefined, settings.model || undefined);
 
     const today = new Date().toISOString().slice(0, 10);
     const sessionId = `${today}-prep-${Date.now()}`;
@@ -29,7 +29,8 @@ prepRoute.post('/generate', async (c) => {
 prepRoute.post('/score-star', async (c) => {
   try {
     const { question, answer, jdContext } = await c.req.json<StarScoreRequest>();
-    const score = await scoreStar(question, answer, jdContext);
+    const settings = await readSettings();
+    const score = await scoreStar(question, answer, jdContext, settings.apiKey || undefined, settings.model || undefined);
     return c.json(score);
   } catch (err: any) {
     return c.json({ error: err.message }, 500);

@@ -4,6 +4,7 @@ import { serve } from '@hono/node-server';
 import { settingsRoute } from './routes/settings.js';
 import { chatRoute } from './routes/chat.js';
 import { recognizeJdRoute } from './routes/recognize-jd.js';
+import { prepRoute } from './routes/prep.js';
 
 const app = new Hono();
 
@@ -20,6 +21,7 @@ app.get('/api/health', (c) => {
 app.route('/api/settings', settingsRoute);
 app.route('/api/chat', chatRoute);
 app.route('/api/recognize-jd', recognizeJdRoute);
+app.route('/api/prep', prepRoute);
 
 const port = 3001;
 console.log(`Server running on http://localhost:${port}`);

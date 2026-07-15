@@ -4,7 +4,15 @@ import type { AppSettings, SessionMeta } from '../types.js';
 import { DEFAULT_SETTINGS } from '../types.js';
 
 function vaultPath(): string {
-  return process.env.OBSIDIAN_VAULT_PATH || '';
+  const p = process.env.OBSIDIAN_VAULT_PATH || '';
+  if (!p) {
+    throw new Error(
+      'OBSIDIAN_VAULT_PATH is not set. ' +
+      'Please configure it in .env.local at the project root:\n' +
+      '  OBSIDIAN_VAULT_PATH=C:\\Users\\Administrator\\Documents\\Obsidian Vault\\PM 面试'
+    );
+  }
+  return p;
 }
 
 function settingsPath(): string {

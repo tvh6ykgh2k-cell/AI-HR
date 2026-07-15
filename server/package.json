@@ -1,0 +1,16 @@
+{
+  "name": "pm-interview-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch index.ts"
+  },
+  "dependencies": {
+    "hono": "^4.6.5",
+    "@hono/node-server": "^1.13.7"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.1",
+    "@types/node": "^22.7.5"
+  }
+}

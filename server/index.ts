@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { serve } from '@hono/node-server';
 import { settingsRoute } from './routes/settings.js';
+import { chatRoute } from './routes/chat.js';
 
 const app = new Hono();
 
@@ -16,6 +17,7 @@ app.get('/api/health', (c) => {
 });
 
 app.route('/api/settings', settingsRoute);
+app.route('/api/chat', chatRoute);
 
 const port = 3001;
 console.log(`Server running on http://localhost:${port}`);

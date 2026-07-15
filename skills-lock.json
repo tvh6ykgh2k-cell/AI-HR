@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "interview-prep-generator": {
+      "source": "paramchoudhary/resumeskills",
+      "sourceType": "github",
+      "skillPath": "skills/interview-prep-generator/SKILL.md",
+      "computedHash": "f6bbbeed8aee6e681b8ca2cc61c6e3fa56c42501779ada1e3d6cde49eec9d2ea"
+    }
+  }
+}

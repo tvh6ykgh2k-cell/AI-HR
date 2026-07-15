@@ -1,0 +1,13 @@
+{
+  "name": "pm-interview",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npx tsx watch index.ts",
+    "dev:client": "cd client && npx vite --port 5173",
+    "build": "cd client && npx vite build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

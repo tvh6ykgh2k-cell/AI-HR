@@ -209,9 +209,10 @@ ${resumeSection}
   }
 
   const data = (await response.json()) as any;
-  const content = data.choices[0].message.content;
-  const jsonStr = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  return JSON.parse(jsonStr) as PrepDocument;
+  let content: string = data.choices[0].message.content;
+  // Strip markdown code fences — handle various formats
+  content = content.replace(/```(?:json)?\s*\n?/gi, '').replace(/```\s*/g, '').trim();
+  return JSON.parse(content) as PrepDocument;
 }
 
 // STAR scoring for a single answer
@@ -262,9 +263,9 @@ export async function scoreStar(
   }
 
   const data = (await response.json()) as any;
-  const content = data.choices[0].message.content;
-  const jsonStr = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  return JSON.parse(jsonStr) as StarScore;
+  let content: string = data.choices[0].message.content;
+  content = content.replace(/```(?:json)?\s*\n?/gi, '').replace(/```\s*/g, '').trim();
+  return JSON.parse(content) as StarScore;
 }
 
 // Generate interview summary

@@ -190,19 +190,19 @@ export default function HomePage() {
         </motion.div>
       </div>
 
-      {/* ── DUAL CARDS ── */}
+      {/* ── MODE CARDS ── */}
       <section className="max-w-5xl mx-auto px-6 pb-24">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="grid grid-cols-1 lg:grid-cols-5 gap-6"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          {/* Interview card — larger (3/5) */}
+          {/* Interview card */}
           <TiltCard
             onClick={() => nav('/interview/new')}
-            className="lg:col-span-3 p-10 flex flex-col justify-between min-h-[340px] bg-[linear-gradient(160deg,#0F1F29_0%,#0A151C_100%)]"
+            className="p-8 flex flex-col justify-between min-h-[320px] bg-[linear-gradient(160deg,#0F1F29_0%,#0A151C_100%)]"
           >
             <div>
               <div className="text-5xl mb-6">🎙️</div>
@@ -216,10 +216,10 @@ export default function HomePage() {
             </div>
           </TiltCard>
 
-          {/* Prep card — smaller (2/5) */}
+          {/* Prep card */}
           <TiltCard
             onClick={() => nav('/prep/new')}
-            className="lg:col-span-2 p-10 flex flex-col justify-between min-h-[340px] bg-[linear-gradient(160deg,#1A2218_0%,#0F1710_100%)]"
+            className="p-8 flex flex-col justify-between min-h-[320px] bg-[linear-gradient(160deg,#1A2218_0%,#0F1710_100%)]"
           >
             <div>
               <div className="text-5xl mb-6">📝</div>
@@ -230,6 +230,23 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-3 text-ember text-sm font-medium mt-6">
               生成准备文档 <span className="text-base">→</span>
+            </div>
+          </TiltCard>
+
+          {/* Resume card */}
+          <TiltCard
+            onClick={() => nav('/resume')}
+            className="p-8 flex flex-col justify-between min-h-[320px] bg-[linear-gradient(160deg,#1C1830_0%,#0F0D18_100%)]"
+          >
+            <div>
+              <div className="text-5xl mb-6">📑</div>
+              <h2 className="text-3xl font-bold tracking-[-.02em] mb-3">简历定制</h2>
+              <p className="text-mist text-sm leading-relaxed">
+                上传简历 + 岗位 JD，AI 解析岗位要求与你的匹配度，输出定制方向与修改建议。
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-pulse text-sm font-medium mt-6">
+              定制简历 <span className="text-base">→</span>
             </div>
           </TiltCard>
         </motion.div>

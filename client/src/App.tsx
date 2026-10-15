@@ -6,6 +6,7 @@ const InterviewPage = lazy(() => import('./pages/InterviewPage'));
 const PrepPage = lazy(() => import('./pages/PrepPage'));
 const PrepResultPage = lazy(() => import('./pages/PrepResultPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const ResumePage = lazy(() => import('./pages/ResumePage'));
 
 function Loading() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/interview/:id" element={<InterviewPage />} />
         <Route path="/prep/new" element={<PrepPage />} />
         <Route path="/prep/:id" element={<PrepResultPage />} />
+        <Route path="/resume" element={<ResumePage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </Suspense>

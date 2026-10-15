@@ -25,8 +25,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
     technicalDepth: 3,
   },
   apiKey: '',
-  model: 'agnes-2.0-flash',
-  visionModel: 'agnes-image-2.1-flash',
+  model: 'agnes-3.0-flash',
+  visionModel: 'agnes-image-2.5-flash',
 };
 
 // ========== JD ==========
@@ -112,6 +112,140 @@ export interface SessionMeta {
   date: string;
   company: string;
   position: string;
-  type: 'interview' | 'prep';
+  type: 'interview' | 'prep' | 'resume';
   tags: string[];
+}
+
+// ========== Resume 定制流水线（M1: JD 解析 + 简历解析）==========
+
+// ① JD 解析 —— tailored-resume-generator + job-description-analyzer 逻辑
+export interface JdAnalysis {
+  role: string;                        // 岗位名称
+  company?: string;                    // 公司名（若 JD 中提到）
+  keywords: string[];                  // skills/tools 关键词
+  mustHave: string[];                  // 硬性要求
+  niceToHave: string[];                // 加分项
+  top3Focus: string[];                 // 雇主最重视的 3 件事
+  isCareerChange: boolean;             // JD 是否暗示职业转换场景（对求职者而言）
+  transferableHints?: string[];        // 可迁移技能提示
+  // —— job-description-analyzer 匹配策略 ——
+  matchBand: 'strong' | 'possible' | 'weak';   // 是否值得投分档（对典型候选人）
+  applicationPriority: 'high' | 'medium' | 'low';
+  redFlags: string[];                  // JD 风险提示（薪资面议/高频加班/职责漂移等）
+  strategy: string;                    // 投递策略一句话
+}
+
+// resume/analyze-jd 请求/响应
+export interface JdAnalyzeRequest {
+  jdText: string;
+}
+
+// ② 简历结构化解析
+export interface ResumeExperience {
+  company?: string;
+  role?: string;
+  period?: string;
+  bullets: string[];
+}
+
+export interface ParsedResume {
+  rawText: string;
+  name?: string;
+  title?: string;                     // 求职意向/当前头衔
+  summary?: string;
+  experience: ResumeExperience[];
+  skills: string[];
+  education?: string[];
+  projects?: string[];
+  certifications?: string[];
+}
+
+export interface ResumeParseRequest {
+  resumeText: string;
+}
+
+// ③ 简历 × JD 匹配分析 —— resume-ats-optimizer 逻辑
+// 关键词命中/缺失为确定性算法产出（可单测），评分/ATS体检/建议/缺口由 LLM 产出
+export interface MatchReport {
+  score: number;                       // 0-100 匹配度
+  hitKeywords: string[];              // JD 关键词中简历已覆盖
+  missingKeywords: string[];          // JD 关键词中简历未覆盖（确定性，单测断言）
+  atsChecks: { item: string; pass: boolean; note: string }[];
+  gaps: string[];                     // 简历完全没覆盖、但岗位要求的能力（语义缺口）
+  suggestions: {
+    id: string;
+    current: string;                  // 简历现状片段
+    suggested: string;                // 建议改法
+    reason: string;                   // 理由
+    priority: 'P0' | 'P1' | 'P2';
+  }[];
+}
+
+export interface MatchRequest {
+  jdText: string;
+  resumeText: string;
+  jdAnalysis?: JdAnalysis;            // 已有 JD 解析则复用，避免重复 LLM 调用
+}
+
+// ④ 定制简历生成 —— tailored-resume-generator 逻辑
+// 不造假原则：所有事实/数字必须来自原简历，缺数据用 [待补充: xxx] 占位，绝不虚构
+export interface TailoredExperience {
+  company?: string;
+  role?: string;
+  period?: string;
+  tag?: string;                  // 角色定位（如"方向主导"）
+  bullets: string[];             // 定制后的成果导向 bullet（可含 [待补充] 占位）
+}
+
+export interface TailoredSkillRow {
+  label: string;                 // 技能分组，如"产品"/"数据"/"工具"
+  body: string;
+}
+
+export interface TailoredResume {
+  name?: string;
+  englishName?: string;
+  targetTitle: string;           // 求职意向（目标岗位）
+  contact: {
+    phone?: string;
+    email?: string;
+    location?: string;
+    website?: string;
+  };
+  summary: string;               // 定制后的个人简介（可含 [待补充]）
+  highlights: { value: string; unit?: string; label: string }[];  // 3-4 个最强数字标签
+  experience: TailoredExperience[];
+  skills: TailoredSkillRow[];
+  education?: string[];
+  certifications?: string[];
+  changes: { section: string; change: string; reason: string }[]; // 修改日志（每处改动 + 理由）
+  placeholders: string[];        // 需要人工补数据的位置清单
+}
+
+export interface TailorRequest {
+  resumeText: string;
+  jdText: string;
+  jdAnalysis?: JdAnalysis;
+  match?: MatchReport;           // 已有匹配报告则复用，聚焦改 P0 项
+}
+
+// ⑤ 排版（确定性，无 LLM）
+export interface LayoutResult {
+  html: string;                  // 完整可交付 HTML（内嵌 kami 版式 CSS，可下载/打印为 PDF）
+  fileName: string;
+  placeholderCount: number;      // [待补充] 占位数量（>0 时前端提示补数据）
+}
+
+export interface LayoutRequest {
+  resume: TailoredResume;
+}
+
+// ⑥ 整条流水线存档（M4）
+export interface ResumeSessionPayload {
+  jdText: string;
+  jdAnalysis?: JdAnalysis;
+  match?: MatchReport;
+  tailored?: TailoredResume;
+  interviewPrepSessionId?: string;   // 若已生成面试准备文档
+  notes?: string;
 }

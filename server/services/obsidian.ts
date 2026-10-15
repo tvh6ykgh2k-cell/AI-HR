@@ -102,7 +102,7 @@ export async function listSessions(): Promise<SessionMeta[]> {
         date: get('date'),
         company: get('company'),
         position: get('position'),
-        type: (get('type') as 'interview' | 'prep') || 'interview',
+        type: (get('type') as 'interview' | 'prep' | 'resume') || 'interview',
         tags: get('tags').replace(/[[\]"]/g, '').split(',').map(t => t.trim()).filter(Boolean),
       });
     }

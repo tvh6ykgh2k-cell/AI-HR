@@ -2,12 +2,14 @@ import type { ChatMessage, PrepDocument, StarScore } from '../types.js';
 
 const BASE_URL = process.env.AGNES_BASE_URL || 'https://apihub.agnes-ai.com/v1';
 const API_KEY = process.env.AGNES_API_KEY || '';
+// 默认模型（可被每次调用的 modelOverride 覆盖）
+const TEXT_MODEL = process.env.AGNES_TEXT_MODEL || 'agnes-3.0-flash';
+const IMAGE_MODEL = process.env.AGNES_IMAGE_MODEL || 'agnes-image-2.5-flash';
 
 function getApiKey(overrideKey?: string): string {
-  return overrideKey || API_KEY;
+  // ESM: 调用时实时读 process.env（dotenv 在 index.ts 顶层加载，import 先执行 → 模块期常量恒为 ''）
+  return overrideKey || process.env.AGNES_API_KEY || API_KEY;
 }
-
-// Model is set by user in settings page; empty = use API default
 
 interface SendChatOptions {
   stream?: boolean;
@@ -21,7 +23,7 @@ export async function* sendChat(
   options: SendChatOptions = {}
 ): AsyncGenerator<string> {
   const apiKey = getApiKey(options.apiKeyOverride);
-  const model = options.modelOverride || '';
+  const model = options.modelOverride || TEXT_MODEL;
 
   const response = await fetch(`${BASE_URL}/chat/completions`, {
     method: 'POST',
@@ -92,7 +94,7 @@ export async function recognizeJD(
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: modelOverride || '',
+      model: modelOverride || IMAGE_MODEL,
       messages: [
         {
           role: 'user',
@@ -197,7 +199,7 @@ ${resumeSection}
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: modelOverride || '',
+      model: modelOverride || TEXT_MODEL,
       messages: [{ role: 'user', content: prompt }],
       stream: false,
     }),
@@ -251,7 +253,7 @@ export async function scoreStar(
       'Authorization': `Bearer ${getApiKey(apiKeyOverride)}`,
     },
     body: JSON.stringify({
-      model: modelOverride || '',
+      model: modelOverride || TEXT_MODEL,
       messages: [{ role: 'user', content: prompt }],
       stream: false,
     }),
@@ -292,7 +294,7 @@ ${sessionContent}
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: modelOverride || '',
+      model: modelOverride || TEXT_MODEL,
       messages: [{ role: 'user', content: prompt }],
       stream: false,
     }),

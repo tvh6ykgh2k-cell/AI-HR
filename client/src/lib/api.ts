@@ -27,6 +27,22 @@ export const api = {
   listSessions: () => request<any[]>('/sessions'),
   getSession: (id: string) => request<any>(`/sessions/${id}`),
   deleteSession: (id: string) => request<any>(`/sessions/${id}`, { method: 'DELETE' }),
+  // 简历定制流水线（M1）
+  analyzeJD: (jdText: string) =>
+    request<any>('/resume/analyze-jd', { method: 'POST', body: JSON.stringify({ jdText }) }),
+  parseResume: (resumeText: string) =>
+    request<any>('/resume/parse', { method: 'POST', body: JSON.stringify({ resumeText }) }),
+  // M2
+  matchResume: (jdText: string, resumeText: string, jdAnalysis?: any) =>
+    request<any>('/resume/match', { method: 'POST', body: JSON.stringify({ jdText, resumeText, jdAnalysis }) }),
+  // M3
+  tailorResume: (jdText: string, resumeText: string, jdAnalysis?: any, match?: any) =>
+    request<any>('/resume/tailor', { method: 'POST', body: JSON.stringify({ jdText, resumeText, jdAnalysis, match }) }),
+  layoutResume: (resume: any) =>
+    request<any>('/resume/layout', { method: 'POST', body: JSON.stringify({ resume }) }),
+  // M4 整条流水线存档（jdText 必填；其余可缺）
+  archiveResumeSession: (payload: any) =>
+    request<any>('/resume/session', { method: 'POST', body: JSON.stringify(payload) }),
 };
 
 export function streamChat(

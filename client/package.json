@@ -7,11 +7,13 @@
     "build": "tsc && vite build"
   },
   "dependencies": {
+    "framer-motion": "^10.18.0",
+    "mammoth": "^1.13.0",
+    "pdfjs-dist": "^6.4.299",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0",
-    "zustand": "^4.5.5",
-    "framer-motion": "^10.18.0"
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@types/react": "^18.3.11",

@@ -32,6 +32,7 @@ import { chatRoute } from './routes/chat.js';
 import { recognizeJdRoute } from './routes/recognize-jd.js';
 import { prepRoute } from './routes/prep.js';
 import { sessionsRoute } from './routes/sessions.js';
+import { resumeRoute } from './routes/resume.js';
 import { sendChat } from './services/agnes.js';
 import { readSettings } from './services/obsidian.js';
 
@@ -52,6 +53,7 @@ app.route('/api/chat', chatRoute);
 app.route('/api/recognize-jd', recognizeJdRoute);
 app.route('/api/prep', prepRoute);
 app.route('/api/sessions', sessionsRoute);
+app.route('/api/resume', resumeRoute);
 
 app.post('/api/test-connection', async (c) => {
   try {

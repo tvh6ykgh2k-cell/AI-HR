@@ -39,7 +39,7 @@ export default function VoiceButton({ onResult }: Props) {
         onMouseLeave={mode === 'hold' && recording ? stopRecognition : undefined}
         onDoubleClick={() => setMode(mode === 'hold' ? 'toggle' : 'hold')}
         onClick={mode === 'toggle' ? () => recording ? stopRecognition() : startRecognition() : undefined}
-        className={`p-3 rounded-full transition-all ${recording ? 'bg-error animate-pulse' : 'bg-surface border hover:border-[rgba(255,255,255,.2)]'}`}
+        className={`p-3 rounded-full transition-all ${recording ? 'bg-error animate-pulse' : 'bg-surface border hover:border-border-hover'}`}
         title={mode === 'hold' ? '按住说话 · 双击切换模式' : '点击开始/结束 · 双击切换模式'}
       >🎤</button>
     </div>

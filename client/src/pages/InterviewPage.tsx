@@ -86,12 +86,12 @@ export default function InterviewPage() {
         <div className="max-w-xl w-full">
           <h1 className="text-3xl font-bold mb-8 text-center">🎙️ 模拟面试 · 选择岗位</h1>
           <ImagePaste onImage={handleImage} loading={recognizing} />
-          <div className="my-6 flex items-center gap-4"><div className="flex-1 h-px bg-[rgba(255,255,255,.06)]" /><span className="text-iron text-sm">或直接描述</span><div className="flex-1 h-px bg-[rgba(255,255,255,.06)]" /></div>
+          <div className="my-6 flex items-center gap-4"><div className="flex-1 h-px bg-void" /><span className="text-iron text-sm">或直接描述</span><div className="flex-1 h-px bg-void" /></div>
           <textarea value={jdText} onChange={(e) => setJdText(e.target.value)} placeholder="粘贴 JD 文本，例如：&#10;腾讯前端高级工程师&#10;要求精通 React、TypeScript..."
             className="input-field w-full h-40 resize-none" />
           <div className="flex gap-2 mt-3 flex-wrap">
             {['前端','后端','产品经理','算法','设计','运营'].map(tag => (
-              <button key={tag} onClick={() => setJdText(p => p + ` ${tag}工程师`)} className="px-3 py-1 bg-surface border rounded-full text-xs text-mist hover:text-ink hover:border-[rgba(255,255,255,.2)] transition-colors">{tag}</button>
+              <button key={tag} onClick={() => setJdText(p => p + ` ${tag}工程师`)} className="px-3 py-1 bg-surface border rounded-full text-xs text-mist hover:text-ink hover:border-iron transition-colors">{tag}</button>
             ))}
           </div>
           <button onClick={startInterview} disabled={!jdText.trim()} className="btn-primary w-full mt-6">开始面试 →</button>
@@ -102,7 +102,7 @@ export default function InterviewPage() {
 
   return (
     <div className="h-screen flex flex-col">
-      <div className="bg-[#0A0C12] border-b px-4 py-3 flex items-center justify-between shrink-0">
+      <div className="bg-surface border-b px-4 py-3 flex items-center justify-between shrink-0">
         <button onClick={() => nav('/')} className="text-iron hover:text-ink text-sm transition-colors">← 退出</button>
         <div className="text-center"><div className="text-sm font-medium">🎙️ 面试进行中...</div><div className="text-xs text-iron">{jdParsed?.position || '模拟面试'}</div></div>
         <div className="flex gap-2">
@@ -120,12 +120,12 @@ export default function InterviewPage() {
         <div ref={chatEndRef} />
       </div>
 
-      <div className="bg-[#0A0C12] border-t px-4 py-2 flex items-center justify-between text-xs text-iron shrink-0">
+      <div className="bg-surface border-t px-4 py-2 flex items-center justify-between text-xs text-iron shrink-0">
         <span>💾 已自动保存到 Obsidian</span>
         <span>STAR覆盖: {Math.round((starCoverage.s + starCoverage.t + starCoverage.a + starCoverage.r) / 4 * 100)}%</span>
       </div>
 
-      <div className="bg-[#0A0C12] border-t px-4 py-3 flex items-center gap-3 shrink-0">
+      <div className="bg-surface border-t px-4 py-3 flex items-center gap-3 shrink-0">
         <input value={inputText} onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(inputText); } }}
           placeholder="输入你的回答... (Enter 发送)" className="flex-1 input-field" disabled={isStreaming} />

@@ -81,8 +81,8 @@ export default function FileUpload({ title, hint, accept, onText, loading, initi
         onClick={() => inputRef.current?.click()}
         className={`border-2 border-dashed rounded-xl px-4 py-5 text-center cursor-pointer transition-all ${
           dragOver
-            ? 'border-pulse bg-[rgba(61,214,200,.05)]'
-            : 'border-[rgba(255,255,255,.12)] hover:border-[rgba(255,255,255,.22)]'
+            ? 'border-pulse bg-pulse/5'
+            : 'border hover:border-iron'
         }`}
       >
         <input
@@ -109,7 +109,7 @@ export default function FileUpload({ title, hint, accept, onText, loading, initi
         onChange={(e) => { setText(e.target.value); onText(e.target.value); }}
         placeholder="或直接在这里粘贴文本…"
         rows={Math.max(5, Math.min(12, text.split('\n').length))}
-        className="w-full bg-surface border border-[rgba(255,255,255,.08)] rounded-lg p-3 text-sm text-ink placeholder:text-iron resize-y focus:border-pulse focus:outline-none transition-colors"
+        className="w-full bg-surface border border rounded-lg p-3 text-sm text-ink placeholder:text-iron resize-y focus:border-pulse focus:outline-none transition-colors"
       />
     </div>
   );

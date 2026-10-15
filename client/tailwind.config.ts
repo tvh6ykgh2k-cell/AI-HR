@@ -4,17 +4,18 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      /* 浅色商业 SaaS 基色 — 类名保持 void/surface/ink/mist/iron/pulse/ember 不变，只翻值 */
       colors: {
-        void:    '#08090D',
-        surface: '#111318',
-        ink:     '#ECEEF5',
-        mist:    '#84889A',
-        iron:    '#3E4050',
-        pulse:   '#3DD6C8',
-        ember:   '#F0A050',
-        success: '#22C55E',
-        warning: '#F0A050',
-        error:   '#EF4444',
+        void:    '#F5F7FA',  /* 页面底色（浅灰） */
+        surface: '#FFFFFF',  /* 卡片 / 输入（纯白） */
+        ink:     '#1F2937',  /* 主文字（slate-800） */
+        mist:    '#64748B',  /* 次文字（slate-500） */
+        iron:    '#94A3B8',  /* 辅助 / 占位（slate-400） */
+        pulse:   '#2563EB',  /* 主色（专业蓝 blue-600） */
+        ember:   '#D97706',  /* 警示 / 强调（amber-600） */
+        success: '#16A34A',
+        warning: '#D97706',
+        error:   '#DC2626',
       },
       fontFamily: {
         ui:   ["-apple-system", "'Segoe UI'", "'Microsoft YaHei'", "'PingFang SC'", "system-ui", "sans-serif"],
@@ -35,15 +36,19 @@ export default {
         '32px':'32px', '40px':'40px', '48px':'48px',
       },
       borderRadius: {
-        'sm': '6px',  'md': '10px', 'lg': '16px',
-        'xl': '24px', 'full': '9999px',
+        'sm': '6px',  'md': '10px', 'lg': '12px',
+        'xl': '16px', 'full': '9999px',
       },
       borderColor: {
-        DEFAULT: 'rgba(255,255,255,.08)',
+        DEFAULT: '#E5E7EB',  /* 卡片描边（slate-200） */
+      },
+      boxShadow: {
+        card: '0 1px 2px rgba(15, 23, 42, 0.04)',
+        'card-hover': '0 4px 12px rgba(15, 23, 42, 0.06)',
       },
       keyframes: {
         'fade-up': {
-          '0%':   { opacity: '0', transform: 'translateY(16px)' },
+          '0%':   { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         'fade-in': {
@@ -51,7 +56,7 @@ export default {
           '100%': { opacity: '1' },
         },
         'breath': {
-          '0%, 100%': { opacity: '0.4' },
+          '0%, 100%': { opacity: '0.5' },
           '50%':      { opacity: '1' },
         },
         'slide-left': {
@@ -60,10 +65,10 @@ export default {
         },
       },
       animation: {
-        'fade-up':   'fade-up 0.5s ease-out both',
-        'fade-in':   'fade-in 0.3s ease-out both',
+        'fade-up':   'fade-up 0.3s ease-out both',
+        'fade-in':   'fade-in 0.2s ease-out both',
         'breath':    'breath 1.5s ease-in-out infinite',
-        'slide-left':'slide-left 0.4s cubic-bezier(0.16,1,0.3,1) both',
+        'slide-left':'slide-left 0.3s ease-out both',
       },
     },
   },

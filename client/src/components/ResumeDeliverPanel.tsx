@@ -104,7 +104,7 @@ export default function ResumeDeliverPanel() {
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className="mt-8"
     >
-      <div className="bg-surface border border-[rgba(255,255,255,.08)] rounded-2xl p-6">
+      <div className="bg-surface border border rounded-2xl p-6">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h3 className="font-semibold flex items-center gap-2">🚀 定制 & 交付（M3 · M4）</h3>
@@ -123,8 +123,23 @@ export default function ResumeDeliverPanel() {
         </div>
 
         {/* M3 定制简历 */}
+        {store.phase === 'tailoring' && (
+          <div className="space-y-3 border-t border pt-4">
+            <div className="skel h-5 w-1/2" />
+            <div className="skel h-4 w-full" />
+            <div className="skel h-4 w-5/6" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="skel h-16" />
+              <div className="skel h-16" />
+              <div className="skel h-16" />
+              <div className="skel h-16" />
+            </div>
+            <div className="text-xs text-iron">正在生成定制简历（LLM · 不造假：缺数留 [待补充] 占位）…</div>
+          </div>
+        )}
+
         {t && (
-          <div className="space-y-4 text-sm border-t border-[rgba(255,255,255,.08)] pt-4">
+          <div className="space-y-4 text-sm border-t border pt-4">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-base font-semibold text-ink">{t.name || '候选人'}</span>
               <span className="text-xs text-pulse">{t.targetTitle}</span>
@@ -191,7 +206,7 @@ export default function ResumeDeliverPanel() {
 
             {/* 修改日志 */}
             {t.changes?.length > 0 && (
-              <details className="rounded-lg border border-[rgba(255,255,255,.08)] p-3">
+              <details className="rounded-lg border border p-3">
                 <summary className="text-xs text-mist cursor-pointer">📝 修改日志（{t.changes.length}）</summary>
                 <ul className="mt-2 space-y-1.5 text-xs text-iron">
                   {t.changes.map((c, i) => (
@@ -233,7 +248,7 @@ export default function ResumeDeliverPanel() {
 
             {/* 排版预览 iframe */}
             {layout && (
-              <div className="rounded-lg overflow-hidden border border-[rgba(255,255,255,.1)] bg-white">
+              <div className="rounded-lg overflow-hidden border border bg-white">
                 <iframe
                   title="简历排版预览"
                   srcDoc={layout.html}
@@ -246,13 +261,13 @@ export default function ResumeDeliverPanel() {
 
         {/* M4 面试准备 */}
         {prep && (
-          <div className="space-y-4 text-sm border-t border-[rgba(255,255,255,.08)] pt-4 mt-4">
+          <div className="space-y-4 text-sm border-t border pt-4 mt-4">
             <div className="text-mist text-xs uppercase tracking-wider">🎤 面试准备文档 <span className="text-iron normal-case">（{prep.sessionId}）</span></div>
 
             {prep.selfIntroShort && (
               <div>
                 <div className="text-xs text-mist mb-1">60 秒自我介绍</div>
-                <p className="text-mist bg-[rgba(255,255,255,.03)] border border-[rgba(255,255,255,.06)] rounded-lg p-3">{prep.selfIntroShort}</p>
+                <p className="text-mist bg-void border border rounded-lg p-3">{prep.selfIntroShort}</p>
               </div>
             )}
 
@@ -263,7 +278,7 @@ export default function ResumeDeliverPanel() {
                   {prep.questions.slice(0, 8).map((q, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${
-                        q.probability === '高' ? 'bg-error/15 text-error' : q.probability === '中' ? 'bg-ember/15 text-ember' : 'bg-[rgba(255,255,255,.08)] text-iron'
+                        q.probability === '高' ? 'bg-error/15 text-error' : q.probability === '中' ? 'bg-ember/15 text-ember' : 'bg-void text-iron'
                       }`}>{q.probability}</span>
                       <span className="text-sm text-ink">{q.question}</span>
                     </div>
@@ -273,7 +288,7 @@ export default function ResumeDeliverPanel() {
             )}
 
             {prep.starStories?.length > 0 && (
-              <details className="rounded-lg border border-[rgba(255,255,255,.08)] p-3">
+              <details className="rounded-lg border border p-3">
                 <summary className="text-xs text-mist cursor-pointer">⭐ STAR 故事（{prep.starStories.length}）</summary>
                 <div className="mt-2 space-y-3">
                   {prep.starStories.map((s, i) => (
@@ -301,14 +316,14 @@ export default function ResumeDeliverPanel() {
         )}
 
         {/* M4 存档 */}
-        <div className="border-t border-[rgba(255,255,255,.08)] pt-4 mt-4">
+        <div className="border-t border pt-4 mt-4">
           <div className="text-mist text-xs uppercase tracking-wider mb-2">💾 整单存档到 Obsidian（M4）</div>
           <div className="flex flex-wrap gap-2 items-start">
             <input
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="备注（可选，如：本单已补 GMV 数据…）"
-              className="flex-1 min-w-[200px] bg-[rgba(255,255,255,.04)] border border-[rgba(255,255,255,.1)] rounded-lg px-3 py-2 text-xs text-ink placeholder:text-iron focus:outline-none focus:border-pulse/50"
+              className="flex-1 min-w-[200px] bg-void border border rounded-lg px-3 py-2 text-xs text-ink placeholder:text-iron focus:outline-none focus:border-pulse/50"
             />
             <button onClick={handleArchive} disabled={store.phase === 'archiving'} className="btn-primary text-xs px-4 py-2">
               {store.phase === 'archiving' ? '存档中…' : '存档本次工单'}

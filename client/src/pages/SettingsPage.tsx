@@ -60,7 +60,7 @@ export default function SettingsPage() {
                 <span className="text-xs text-iron w-8 text-right">{left}</span>
                 <input type="range" min="1" max="5" value={(store.sliders as any)[key]}
                   onChange={(e) => handleSlider(key, Number(e.target.value))}
-                  className="flex-1 accent-[#3DD6C8] h-2 rounded-full appearance-none bg-surface cursor-pointer" />
+                  className="flex-1 accent-pulse h-2 rounded-full appearance-none bg-surface cursor-pointer" />
                 <span className="text-xs text-iron w-8">{right}</span>
               </div>
             </div>

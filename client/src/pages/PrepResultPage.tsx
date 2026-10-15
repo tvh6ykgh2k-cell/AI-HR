@@ -29,12 +29,12 @@ export default function PrepResultPage() {
   return (
     <div className="h-screen flex">
       {/* Sidebar */}
-      <div className="w-64 bg-[#0A0C12] border-r p-4 flex flex-col shrink-0">
+      <div className="w-64 bg-surface border-r p-4 flex flex-col shrink-0">
         <h2 className="font-bold mb-4">📝 面试准备文档</h2>
         <nav className="flex-1 space-y-1">
           {sections.map((s) => (
             <button key={s.key} onClick={() => setActiveSection(s.key)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${activeSection === s.key ? 'bg-[rgba(61,214,200,.15)] text-pulse' : 'text-mist hover:bg-surface'}`}>
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${activeSection === s.key ? 'bg-pulse/15 text-pulse' : 'text-mist hover:bg-surface'}`}>
               {s.label} {s.count != null && <span className="text-iron text-xs">({s.count})</span>}
             </button>
           ))}
@@ -96,7 +96,7 @@ export default function PrepResultPage() {
                 <div key={i} className="card">
                   <h3 className="text-lg font-medium mb-1">{story.name}</h3>
                   <div className="flex gap-2 mb-3">
-                    {story.coversCompetencies?.map((c: string) => <span key={c} className="text-xs bg-[rgba(61,214,200,.1)] text-pulse px-2 py-0.5 rounded-full">{c}</span>)}
+                    {story.coversCompetencies?.map((c: string) => <span key={c} className="text-xs bg-pulse/10 text-pulse px-2 py-0.5 rounded-full">{c}</span>)}
                   </div>
                   <dl className="space-y-3 text-sm">
                     <div><dt className="text-iron">Situation</dt><dd className="mt-1">{story.situation}</dd></div>

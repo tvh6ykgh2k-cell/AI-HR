@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import ImagePaste from '../components/ImagePaste';
 import FileUpload from '../components/FileUpload';
 import ResumeDeliverPanel from '../components/ResumeDeliverPanel';
+import PipelineStepper from '../components/PipelineStepper';
 import { useResumeStore } from '../stores/resumeStore';
 import { api } from '../lib/api';
 
@@ -21,7 +22,7 @@ const PRI_META: Record<string, { label: string; cls: string }> = {
 
 function Section({ icon, title, children, right }: { icon: string; title: string; children: React.ReactNode; right?: React.ReactNode }) {
   return (
-    <div className="bg-surface border border-[rgba(255,255,255,.08)] rounded-2xl p-6">
+    <div className="bg-surface border border rounded-2xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold flex items-center gap-2">
           <span>{icon}</span>{title}
@@ -35,7 +36,7 @@ function Section({ icon, title, children, right }: { icon: string; title: string
 
 function Chip({ children, tone = 'default' }: { children: React.ReactNode; tone?: 'default' | 'pulse' | 'ember' | 'error' }) {
   const map = {
-    default: 'border-[rgba(255,255,255,.12)] text-mist',
+    default: 'border text-mist',
     pulse: 'border-pulse/40 text-pulse bg-pulse/10',
     ember: 'border-ember/40 text-ember bg-ember/10',
     error: 'border-error/40 text-error bg-error/10',
@@ -55,7 +56,7 @@ function ScoreRing({ score }: { score: number }) {
   return (
     <div className="relative w-24 h-24 flex-shrink-0">
       <svg className="w-24 h-24 -rotate-90" viewBox="0 0 80 80">
-        <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="7" />
+        <circle cx="40" cy="40" r={r} fill="none" stroke="#E5E7EB" strokeWidth="7" />
         <circle
           cx="40" cy="40" r={r} fill="none"
           stroke={color} strokeWidth="7" strokeLinecap="round"
@@ -126,8 +127,13 @@ export default function ResumePage() {
     store.setPhase('matching');
     store.setError(null);
     try {
-      // 复用已有的 JD 解析（若已分析过）避免重复 LLM 调用
-      const report = await api.matchResume(store.jdText, store.resumeText, store.jdAnalysis || undefined);
+      // 若尚未解析 JD，先跑 analyzeJD 取关键词集，注入确定性关键词匹配；已解析则复用，避免重复 LLM 调用
+      let analysis = store.jdAnalysis;
+      if (!analysis) {
+        analysis = await api.analyzeJD(store.jdText);
+        store.setJdAnalysis(analysis);
+      }
+      const report = await api.matchResume(store.jdText, store.resumeText, analysis);
       store.setMatch(report);
     } catch (err: any) {
       store.setError(`匹配分析失败：${err.message}`);
@@ -159,6 +165,8 @@ export default function ResumePage() {
           {store.phase === 'matching' ? '匹配分析中…' : '⚡ 匹配分析（M2）'}
         </button>
       </div>
+
+      <PipelineStepper />
 
       {store.error && (
         <div className="mb-6 px-4 py-3 rounded-lg border border-error/30 bg-error/10 text-error text-sm">{store.error}</div>
@@ -266,7 +274,7 @@ export default function ResumePage() {
 
               <div>
                 <div className="text-mist text-xs uppercase tracking-wider mb-2">🧭 投递策略</div>
-                <p className="text-ink bg-[rgba(61,214,200,.05)] border border-pulse/20 rounded-lg p-3">{jd.strategy}</p>
+                <p className="text-ink bg-pulse/5 border border-pulse/20 rounded-lg p-3">{jd.strategy}</p>
               </div>
 
               {jd.redFlags.length > 0 && (
@@ -311,7 +319,7 @@ export default function ResumePage() {
                   <div className="text-mist text-xs uppercase tracking-wider mb-2">工作经历（{store.resumeParsed.experience.length}）</div>
                   <div className="space-y-3">
                     {store.resumeParsed.experience.map((e, i) => (
-                      <div key={i} className="border-l-2 border-[rgba(255,255,255,.1)] pl-3">
+                      <div key={i} className="border-l-2 border pl-3">
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-ink">{e.role || e.company}</span>
                           {e.company && <span className="text-mist text-xs">@ {e.company}</span>}
@@ -349,6 +357,28 @@ export default function ResumePage() {
       )}
 
       {/* M2 匹配分析结果 */}
+      {store.phase === 'matching' && (
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-8"
+        >
+          <Section icon="📊" title="匹配分析结果">
+            <div className="flex items-center gap-4">
+              <div className="skel h-24 w-24 flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="skel h-4 w-1/3" />
+                <div className="skel h-6 w-2/3" />
+                <div className="skel h-6 w-1/2" />
+              </div>
+            </div>
+            <div className="skel mt-4 h-16 w-full" />
+            <div className="text-xs text-iron mt-3">正在分析 JD 与简历匹配度…（含确定性关键词检测）</div>
+          </Section>
+        </motion.div>
+      )}
+
       {m && (
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -366,9 +396,13 @@ export default function ResumePage() {
                     {m.hitKeywords.map((k, i) => <Chip key={i} tone="pulse">✓ {k}</Chip>)}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {m.missingKeywords.length ? (
+                    {m.missingKeywords.length > 0 ? (
                       m.missingKeywords.map((k, i) => <Chip key={i} tone="error">✗ {k}</Chip>)
-                    ) : <Chip>全部命中</Chip>}
+                    ) : m.hitKeywords.length > 0 ? (
+                      <Chip>全部命中</Chip>
+                    ) : (
+                      <Chip tone="ember">未提取关键词（先「解析 JD」再匹配，可启用确定性检测）</Chip>
+                    )}
                   </div>
                 </div>
               </div>
@@ -408,17 +442,17 @@ export default function ResumePage() {
                   <div className="text-mist text-xs uppercase tracking-wider mb-2">💡 逐条修改建议</div>
                   <div className="space-y-3">
                     {m.suggestions.map((s) => (
-                      <div key={s.id} className="border border-[rgba(255,255,255,.08)] rounded-lg p-3">
+                      <div key={s.id} className="border border rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-1.5">
                           <span className={`text-xs font-bold px-2 py-0.5 rounded ${
                             s.priority === 'P0' ? 'bg-error/15 text-error'
                             : s.priority === 'P1' ? 'bg-ember/15 text-ember'
-                            : 'bg-[rgba(255,255,255,.08)] text-mist'
+                            : 'bg-void text-mist'
                           }`}>{s.priority}</span>
                           <span className="text-xs text-iron">{s.id}</span>
                         </div>
                         {s.current && (
-                          <div className="text-xs text-mist line-through decoration-[rgba(255,255,255,.2)] mb-1">
+                          <div className="text-xs text-mist line-through decoration-iron mb-1">
                             现状：{s.current}
                           </div>
                         )}

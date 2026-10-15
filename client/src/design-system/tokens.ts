@@ -1,35 +1,30 @@
 /**
- * AI 面试官平台 — Design Tokens
- * finesse · product register · SOUL=6 SPECTACLE=3 DENSITY=7
- *
- * Palette: Teal+Amber on deep blue-gray — precision intelligence, human warmth.
- * Anti-default: no AI-purple (#6366f1), no Inter-only, no glassmorphism.
+ * AI 面试官平台 — Design Tokens（商业化浅色 SaaS）
+ * Palette: 专业蓝 + 琥珀 on 浅灰白底 — clean, professional, enterprise SaaS.
+ * Anti-default: no neon teal, no grain, no spotlight, no 3D tilt, no letter-by-letter reveal.
  */
 
 export const tokens = {
-  // ── Core palette (OKLCH-aware, emitted as hex) ──
-  void:    '#08090D',   // Page bg — near-black with 2° blue-gray tint. Not pure #000.
-  surface: '#111318',   // Card / input / elevated surfaces
-  ink:     '#ECEEF5',   // Primary text — slightly cool. Not pure #fff. Contrast ≥7:1 vs Void.
-  mist:    '#84889A',   // Muted / secondary text. Contrast ≥3.5:1 vs Void.
-  iron:    '#3E4050',   // Hairlines / tertiary text / disabled
+  // ── Core palette（浅色商业 SaaS）──
+  void:    '#F5F7FA',   // 页面底色 — 浅灰
+  surface: '#FFFFFF',   // 卡片 / 输入 — 纯白
+  ink:     '#1F2937',   // 主文字 — slate-800
+  mist:    '#64748B',   // 次文字 — slate-500
+  iron:    '#94A3B8',   // 辅助 / 占位 — slate-400
 
-  pulse:   '#3DD6C8',   // PRIMARY ACCENT — teal. Precision, intelligence, technology.
-  ember:   '#F0A050',   // SECONDARY ACCENT — warm amber. STAR scores, CTAs, human warmth.
+  pulse:   '#2563EB',   // 主色 — 专业蓝（blue-600）
+  ember:   '#D97706',   // 次要 / 警示 — 琥珀（amber-600）
 
   // ── Semantic roles ──
-  border:      'rgba(255,255,255,.08)',   // Translucent border — never hard #333
-  borderHover: 'rgba(255,255,255,.14)',
+  border:      '#E5E7EB',   // 卡片描边 — slate-200
+  borderHover: '#D1D5DB',   // hover — slate-300
 
-  // ── State colors (Financial dark heritage) ──
-  success: '#22C55E',
-  warning: '#F0A050',
-  error:   '#EF4444',
+  // ── State colors ──
+  success: '#16A34A',
+  warning: '#D97706',
+  error:   '#DC2626',
 
-  // ── Opacity scale ──
-  grainOpacity: 0.028,
-
-  // ── Typography (product register: fixed scale, not clamp) ──
+  // ── Typography（固定 scale）──
   type: {
     xs:  '11px',
     sm:  '13px',
@@ -58,25 +53,22 @@ export const tokens = {
   radius: {
     sm: '6px',
     md: '10px',
-    lg: '16px',
-    xl: '24px',
+    lg: '12px',
+    xl: '16px',
     full: '9999px',
   },
 
-  // ── Motion (Framer Motion) ──
+  // ── Motion（克制：轻 fade/slide，不做逐字 reveal、无 3D）──
   easing: {
-    out: [0.16, 1, 0.3, 1] as [number, number, number, number],   // scale/opacity transitions
-    inOut: [0.76, 0, 0.24, 1] as [number, number, number, number], // page transitions
+    out: [0.4, 0, 0.2, 1] as [number, number, number, number],
+    inOut: [0.4, 0, 0.2, 1] as [number, number, number, number],
   },
   duration: {
     fast: 0.15,
     normal: 0.25,
-    slow: 0.45,
-    reveal: 0.6,
+    slow: 0.35,
+    reveal: 0.3,
   },
-
-  // ── Grain SVG (inline, ~2KB) ──
-  grainSvg: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E`,
 } as const;
 
 // ── Font stack ──
@@ -85,12 +77,11 @@ export const fontStack = {
   mono: "'JetBrains Mono', 'Cascadia Code', 'Fira Code', ui-monospace, monospace",
 } as const;
 
-// ── Component token shortcuts (derived from core palette) ──
+// ── Component token shortcuts（浅色商业 SaaS）──
 export const semantic = {
   // Chat bubbles
-  bubbleAI:     tokens.surface,
-  bubbleUser:   '#1B3D52',  // teal-tinted dark blue for user messages
-  bubbleUserHover: '#1F455E',
+  bubbleAI:     '#FFFFFF',   // 面试官气泡（白底 + 描边）
+  bubbleUser:   '#EFF6FF',   // 用户气泡 — 蓝 tint（blue-50）
 
   // STAR scoring
   starComplete:   tokens.pulse,
@@ -98,17 +89,17 @@ export const semantic = {
 
   // Buttons
   btnPrimary:        tokens.pulse,
-  btnPrimaryHover:   '#2EC4B7',
-  btnPrimaryText:    '#08090D',
-  btnSecondary:      'rgba(255,255,255,.08)',
-  btnSecondaryHover: 'rgba(255,255,255,.14)',
+  btnPrimaryHover:   '#1D4ED8',
+  btnPrimaryText:    '#FFFFFF',
+  btnSecondary:      '#FFFFFF',
+  btnSecondaryHover: '#F8FAFC',
 
   // Inputs
-  inputBg:      tokens.surface,
+  inputBg:      '#FFFFFF',
   inputBorder:  tokens.border,
   inputFocus:   tokens.pulse,
 
   // Status
   statusActive:    tokens.pulse,
-  statusRecording: '#EF4444',
+  statusRecording: '#DC2626',
 } as const;

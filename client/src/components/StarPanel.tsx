@@ -13,7 +13,7 @@ export default function StarPanel({ coverage, onClose }: Props) {
 
   return (
     <motion.div initial={{ x: 300 }} animate={{ x: 0 }} exit={{ x: 300 }} transition={{ ease: [0.16,1,0.3,1], duration: 0.4 }}
-      className="fixed right-0 top-0 h-full w-80 bg-[#0C0E14] border-l shadow-2xl p-6 overflow-y-auto z-50">
+      className="fixed right-0 top-0 h-full w-80 bg-surface border-l shadow-2xl p-6 overflow-y-auto z-50">
       <div className="flex justify-between items-center mb-6"><h3 className="font-bold">📊 STAR 覆盖</h3><button onClick={onClose} className="text-iron hover:text-ink">✕</button></div>
       {dims.map((dim) => (
         <div key={dim.key} className="mb-4">

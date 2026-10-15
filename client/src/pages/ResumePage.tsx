@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { FileText, Target, BrainCircuit, ListChecks, BarChart3, Zap } from 'lucide-react';
 import ImagePaste from '../components/ImagePaste';
 import FileUpload from '../components/FileUpload';
 import ResumeDeliverPanel from '../components/ResumeDeliverPanel';
@@ -20,12 +20,12 @@ const PRI_META: Record<string, { label: string; cls: string }> = {
   low: { label: '优先级低', cls: 'text-iron' },
 };
 
-function Section({ icon, title, children, right }: { icon: string; title: string; children: React.ReactNode; right?: React.ReactNode }) {
+function Section({ icon, title, children, right }: { icon?: React.ReactNode; title: string; children: React.ReactNode; right?: React.ReactNode }) {
   return (
-    <div className="bg-surface border border rounded-2xl p-6">
+    <div className="card !p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold flex items-center gap-2">
-          <span>{icon}</span>{title}
+        <h3 className="text-[14px] font-semibold text-ink flex items-center gap-2">
+          {icon && <span className="text-iron">{icon}</span>}{title}
         </h3>
         {right}
       </div>
@@ -73,7 +73,6 @@ function ScoreRing({ score }: { score: number }) {
 }
 
 export default function ResumePage() {
-  const nav = useNavigate();
   const store = useResumeStore();
   const [jdRecognizing, setJdRecognizing] = useState(false);
 
@@ -146,23 +145,22 @@ export default function ResumePage() {
   const m = store.match;
 
   return (
-    <div className="min-h-screen max-w-5xl mx-auto px-6 py-8">
+    <div className="p-6 space-y-5 max-w-5xl">
       {/* header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between">
         <div>
-          <button onClick={() => nav('/')} className="text-xs text-iron hover:text-mist transition-colors mb-2">
-            ← 返回首页
-          </button>
-          <h1 className="text-2xl font-bold tracking-tight">📑 简历定制</h1>
-          <p className="text-sm text-mist mt-1">简历 + JD → 解析 → 匹配 → 定制简历/排版/面试准备（M1–M4 全流水线）</p>
+          <h1 className="text-lg font-semibold text-ink">简历定制</h1>
+          <p className="text-[13px] text-iron mt-1">简历 + 岗位 JD → 匹配分析 → 定制简历 / 排版 / 面试准备</p>
         </div>
         <button
           onClick={handleMatch}
           disabled={!canMatch || store.phase !== 'idle'}
-          className="btn-primary px-5 py-2.5 text-sm"
+          className="btn-primary"
           title={canMatch ? '' : '需先填好 JD 与简历'}
         >
-          {store.phase === 'matching' ? '匹配分析中…' : '⚡ 匹配分析（M2）'}
+          <span className="flex items-center gap-1.5">
+            {store.phase === 'matching' ? '匹配分析中…' : <><Zap size={14} /> 匹配分析</>}
+          </span>
         </button>
       </div>
 
@@ -172,10 +170,10 @@ export default function ResumePage() {
         <div className="mb-6 px-4 py-3 rounded-lg border border-error/30 bg-error/10 text-error text-sm">{store.error}</div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* 左：简历 */}
-        <Section icon="📄" title="简历" right={canParseResume ? (
-          <button onClick={handleParseResume} disabled={store.phase !== 'idle'} className="btn-primary text-xs px-4 py-2">
+        <Section icon={<FileText size={15} />} title="简历" right={canParseResume ? (
+          <button onClick={handleParseResume} disabled={store.phase !== 'idle'} className="btn-primary !text-xs !px-3 !py-1.5">
             {store.phase === 'parsing-resume' ? '解析中…' : store.resumeParsed ? '重新解析' : '解析简历'}
           </button>
         ) : null}>
@@ -189,8 +187,8 @@ export default function ResumePage() {
         </Section>
 
         {/* 右：JD */}
-        <Section icon="🎯" title="岗位 JD" right={canAnalyzeJd ? (
-          <button onClick={handleAnalyzeJd} disabled={store.phase !== 'idle'} className="btn-primary text-xs px-4 py-2">
+        <Section icon={<Target size={15} />} title="岗位 JD" right={canAnalyzeJd ? (
+          <button onClick={handleAnalyzeJd} disabled={store.phase !== 'idle'} className="btn-primary !text-xs !px-3 !py-1.5">
             {store.phase === 'parsing-jd' ? '解析中…' : jd ? '重新解析' : '解析 JD'}
           </button>
         ) : null}>
@@ -216,7 +214,7 @@ export default function ResumePage() {
           className="mt-8"
         >
           <Section
-            icon="🧠"
+            icon={<BrainCircuit size={15} />}
             title="JD 解析结果"
             right={
               <div className="flex items-center gap-2">
@@ -235,7 +233,7 @@ export default function ResumePage() {
               </div>
 
               <div>
-                <div className="text-mist text-xs uppercase tracking-wider mb-2">🔑 关键词</div>
+                <div className="text-mist text-xs uppercase tracking-wider mb-2">关键词</div>
                 <div className="flex flex-wrap gap-1.5">
                   {jd.keywords.map((k, i) => <Chip key={i} tone={i < 5 ? 'pulse' : 'default'}>{k}</Chip>)}
                 </div>
@@ -243,7 +241,7 @@ export default function ResumePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <div className="text-mist text-xs uppercase tracking-wider mb-2">✅ 硬性要求</div>
+                  <div className="text-mist text-xs uppercase tracking-wider mb-2">硬性要求</div>
                   <ul className="space-y-1.5">
                     {jd.mustHave.map((m, i) => (
                       <li key={i} className="flex gap-2 text-ink"><span className="text-error">•</span>{m}</li>
@@ -251,7 +249,7 @@ export default function ResumePage() {
                   </ul>
                 </div>
                 <div>
-                  <div className="text-mist text-xs uppercase tracking-wider mb-2">⭐ 加分项</div>
+                  <div className="text-mist text-xs uppercase tracking-wider mb-2">加分项</div>
                   <ul className="space-y-1.5">
                     {jd.niceToHave.length ? jd.niceToHave.map((m, i) => (
                       <li key={i} className="flex gap-2 text-mist"><span className="text-ember">·</span>{m}</li>
@@ -261,7 +259,7 @@ export default function ResumePage() {
               </div>
 
               <div>
-                <div className="text-mist text-xs uppercase tracking-wider mb-2">🎯 雇主最重视的 3 件事</div>
+                <div className="text-mist text-xs uppercase tracking-wider mb-2">雇主最重视的 3 件事</div>
                 <ol className="space-y-2">
                   {jd.top3Focus.map((f, i) => (
                     <li key={i} className="flex gap-3">
@@ -273,13 +271,13 @@ export default function ResumePage() {
               </div>
 
               <div>
-                <div className="text-mist text-xs uppercase tracking-wider mb-2">🧭 投递策略</div>
+                <div className="text-mist text-xs uppercase tracking-wider mb-2">投递策略</div>
                 <p className="text-ink bg-pulse/5 border border-pulse/20 rounded-lg p-3">{jd.strategy}</p>
               </div>
 
               {jd.redFlags.length > 0 && (
                 <div>
-                  <div className="text-mist text-xs uppercase tracking-wider mb-2">⚠️ 风险提示</div>
+                  <div className="text-mist text-xs uppercase tracking-wider mb-2">风险提示</div>
                   <ul className="space-y-1.5">
                     {jd.redFlags.map((r, i) => (
                       <li key={i} className="flex gap-2 text-ember"><span>⚠</span>{r}</li>
@@ -300,7 +298,7 @@ export default function ResumePage() {
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="mt-6"
         >
-          <Section icon="📋" title="简历解析结果">
+          <Section icon={<ListChecks size={15} />} title="简历解析结果">
             <div className="space-y-4 text-sm">
               <div className="flex items-center gap-4">
                 <div className="font-medium text-base text-ink">{store.resumeParsed.name || store.resumeParsed.title || '（未识别姓名/头衔）'}</div>
@@ -364,7 +362,7 @@ export default function ResumePage() {
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="mt-8"
         >
-          <Section icon="📊" title="匹配分析结果">
+          <Section icon={<BarChart3 size={15} />} title="匹配分析结果">
             <div className="flex items-center gap-4">
               <div className="skel h-24 w-24 flex-shrink-0" />
               <div className="flex-1 space-y-2">
@@ -386,7 +384,7 @@ export default function ResumePage() {
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="mt-8"
         >
-          <Section icon="📊" title="匹配分析结果">
+          <Section icon={<BarChart3 size={15} />} title="匹配分析结果">
             <div className="space-y-5 text-sm">
               <div className="flex items-center gap-6">
                 <ScoreRing score={m.score} />
@@ -408,7 +406,7 @@ export default function ResumePage() {
               </div>
 
               <div>
-                <div className="text-mist text-xs uppercase tracking-wider mb-2">🩺 ATS 体检</div>
+                <div className="text-mist text-xs uppercase tracking-wider mb-2">ATS 体检</div>
                 <div className="space-y-2">
                   {m.atsChecks.map((c, i) => (
                     <div key={i} className="flex items-start gap-2">
@@ -427,7 +425,7 @@ export default function ResumePage() {
               {/* gaps */}
               {m.gaps.length > 0 && (
                 <div>
-                  <div className="text-mist text-xs uppercase tracking-wider mb-2">🕳️ 内容缺口（岗位要但你简历没体现）</div>
+                  <div className="text-mist text-xs uppercase tracking-wider mb-2">内容缺口（岗位要但你简历没体现）</div>
                   <ul className="space-y-1.5">
                     {m.gaps.map((g, i) => (
                       <li key={i} className="flex gap-2 text-ember"><span>·</span>{g}</li>
@@ -439,7 +437,7 @@ export default function ResumePage() {
               {/* suggestions */}
               {m.suggestions.length > 0 && (
                 <div>
-                  <div className="text-mist text-xs uppercase tracking-wider mb-2">💡 逐条修改建议</div>
+                  <div className="text-mist text-xs uppercase tracking-wider mb-2">逐条修改建议</div>
                   <div className="space-y-3">
                     {m.suggestions.map((s) => (
                       <div key={s.id} className="border border rounded-lg p-3">

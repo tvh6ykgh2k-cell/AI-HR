@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { Mic } from 'lucide-react';
 
 interface Props { onResult: (text: string) => void; }
 
@@ -41,7 +42,7 @@ export default function VoiceButton({ onResult }: Props) {
         onClick={mode === 'toggle' ? () => recording ? stopRecognition() : startRecognition() : undefined}
         className={`p-3 rounded-full transition-all ${recording ? 'bg-error animate-pulse' : 'bg-surface border hover:border-border-hover'}`}
         title={mode === 'hold' ? '按住说话 · 双击切换模式' : '点击开始/结束 · 双击切换模式'}
-      >🎤</button>
+      ><Mic size={18} /> </button>
     </div>
   );
 }

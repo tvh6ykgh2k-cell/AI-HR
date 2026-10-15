@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Rocket, Sparkles, Mic, Save, Layout, Download, ClipboardList, CircleCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useResumeStore } from '../stores/resumeStore';
 import { api } from '../lib/api';
@@ -104,20 +105,20 @@ export default function ResumeDeliverPanel() {
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className="mt-8"
     >
-      <div className="bg-surface border border rounded-2xl p-6">
+      <div className="card !p-5">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
-            <h3 className="font-semibold flex items-center gap-2">🚀 定制 & 交付（M3 · M4）</h3>
+            <h3 className="text-[14px] font-semibold text-ink flex items-center gap-2"><Rocket size={15} className="text-iron" /> 定制 & 交付</h3>
             <p className="text-xs text-iron mt-1">
               {ready ? '基于 JD + 简历生成定制简历、排版、面试准备，并存档到 Obsidian' : '需先填好 JD 与简历（各 ≥10 字）'}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button onClick={handleTailor} disabled={!canAct} className="btn-primary text-xs px-4 py-2">
-              {store.phase === 'tailoring' ? '处理中…' : t ? '重新定制' : '✨ 生成定制简历（M3）'}
+            <button onClick={handleTailor} disabled={!canAct} className="btn-primary !text-xs !px-3 !py-1.5">
+              <span className="flex items-center gap-1.5">{store.phase === 'tailoring' ? '处理中…' : t ? <><Rocket size={13} /> 重新定制</> : <><Sparkles size={13} /> 生成定制简历</>}</span>
             </button>
-            <button onClick={handlePrep} disabled={!canAct} className="btn-primary text-xs px-4 py-2">
-              {store.phase === 'preparing' ? '生成中…' : prep ? '重新生成' : '🎤 面试准备（M4）'}
+            <button onClick={handlePrep} disabled={!canAct} className="btn-primary !text-xs !px-3 !py-1.5">
+              <span className='flex items-center gap-1.5'>{store.phase === 'preparing' ? '生成中…' : prep ? '重新生成' : <><Mic size={13} /> 面试准备</>}</span>
             </button>
           </div>
         </div>
@@ -207,7 +208,7 @@ export default function ResumeDeliverPanel() {
             {/* 修改日志 */}
             {t.changes?.length > 0 && (
               <details className="rounded-lg border border p-3">
-                <summary className="text-xs text-mist cursor-pointer">📝 修改日志（{t.changes.length}）</summary>
+                <summary className="text-xs text-mist cursor-pointer">修改日志（{t.changes.length}）</summary>
                 <ul className="mt-2 space-y-1.5 text-xs text-iron">
                   {t.changes.map((c, i) => (
                     <li key={i}>
@@ -233,12 +234,12 @@ export default function ResumeDeliverPanel() {
 
             {/* 排版操作 */}
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <button onClick={handleLayout} className="btn-primary text-xs px-4 py-2">
-                {layout ? '🔄 重新排版' : '🎨 排版（kami 版式）'}
+              <button onClick={handleLayout} className="btn-primary !text-xs !px-3 !py-1.5">
+                <span className='flex items-center gap-1.5'>{layout ? '重新排版' : <><Layout size={13} /> 生成排版</>}</span>
               </button>
               {layout && (
                 <>
-                  <button onClick={downloadHtml} className="btn-secondary text-xs px-4 py-2">⬇️ 下载 HTML（可打印 PDF）</button>
+                  <button onClick={downloadHtml} className="btn-secondary !text-xs !px-3 !py-1.5">下载 HTML（可打印为 PDF）</button>
                   {layout.placeholderCount > 0 && (
                     <span className="text-xs text-ember">含 {layout.placeholderCount} 处占位，补全后再出终稿</span>
                   )}
@@ -262,7 +263,7 @@ export default function ResumeDeliverPanel() {
         {/* M4 面试准备 */}
         {prep && (
           <div className="space-y-4 text-sm border-t border pt-4 mt-4">
-            <div className="text-mist text-xs uppercase tracking-wider">🎤 面试准备文档 <span className="text-iron normal-case">（{prep.sessionId}）</span></div>
+            <div className="text-[13px] font-semibold text-mist">面试准备文档 <span className="text-iron normal-case">（{prep.sessionId}）</span></div>
 
             {prep.selfIntroShort && (
               <div>
@@ -317,7 +318,7 @@ export default function ResumeDeliverPanel() {
 
         {/* M4 存档 */}
         <div className="border-t border pt-4 mt-4">
-          <div className="text-mist text-xs uppercase tracking-wider mb-2">💾 整单存档到 Obsidian（M4）</div>
+          <div className="text-[13px] font-semibold text-mist mb-2 flex items-center gap-1.5"><Save size={14} className="text-iron" /> 整单存档到 Obsidian</div>
           <div className="flex flex-wrap gap-2 items-start">
             <input
               value={notes}
@@ -325,7 +326,7 @@ export default function ResumeDeliverPanel() {
               placeholder="备注（可选，如：本单已补 GMV 数据…）"
               className="flex-1 min-w-[200px] bg-void border border rounded-lg px-3 py-2 text-xs text-ink placeholder:text-iron focus:outline-none focus:border-pulse/50"
             />
-            <button onClick={handleArchive} disabled={store.phase === 'archiving'} className="btn-primary text-xs px-4 py-2">
+            <button onClick={handleArchive} disabled={store.phase === 'archiving'} className="btn-primary !text-xs !px-3 !py-1.5">
               {store.phase === 'archiving' ? '存档中…' : '存档本次工单'}
             </button>
           </div>

@@ -1,10 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import {
+  MessagesSquare, FileText, FileCheck2, ArrowRight, Activity, Clock, CheckCircle2,
+} from 'lucide-react';
 import { api } from '../lib/api';
 
 interface SessionMeta { id: string; date: string; company: string; position: string; type: string; }
 
-// 商业 SaaS 首页：干净、标准卡片、无装饰性动效
+// 企业后台 · 工作台：高密度、线性图标、标准卡片 + 表格，零装饰
 export default function HomePage() {
   const nav = useNavigate();
   const [sessions, setSessions] = useState<SessionMeta[]>([]);
@@ -13,103 +16,124 @@ export default function HomePage() {
     api.listSessions().then(setSessions).catch(() => {});
   }, []);
 
-  const modes = [
+  const entries = [
     {
-      icon: '🎙️',
+      icon: MessagesSquare,
       title: '模拟面试',
-      desc: 'AI 面试官根据岗位 JD 动态提问，语音或文字作答，每轮回答实时 STAR 评分，记录自动归档。',
+      desc: 'AI 面试官按 JD 动态追问，语音/文字作答，实时 STAR 评分。',
       cta: '进入模拟面试',
       to: '/interview/new',
     },
     {
-      icon: '📝',
+      icon: FileText,
       title: '面试准备',
-      desc: '粘贴 JD 和简历，生成 STAR 故事银行、预测问题库、自我介绍脚本，带着准备上面试。',
+      desc: '生成 STAR 故事银行、预测问题库、自我介绍脚本。',
       cta: '生成准备文档',
       to: '/prep/new',
     },
     {
-      icon: '📑',
+      icon: FileCheck2,
       title: '简历定制',
-      desc: '上传简历 + 岗位 JD，分析匹配度并输出定制简历、专业排版与面试准备，全流程存档。',
+      desc: '简历 + JD 匹配，输出定制简历、专业排版与面试准备。',
       cta: '定制简历',
       to: '/resume',
     },
   ];
 
   return (
-    <div className="min-h-screen bg-void">
-      {/* 顶栏 */}
-      <header className="border-b bg-surface">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-semibold text-ink">
-            <span className="w-7 h-7 rounded-lg bg-pulse text-white flex items-center justify-center text-sm">面</span>
-            AI 面试助手
+    <div className="p-6 space-y-5 max-w-6xl">
+      {/* 页头 */}
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-ink">工作台</h1>
+          <p className="text-[13px] text-iron mt-1">管理你的面试练习与简历定制工单</p>
+        </div>
+      </div>
+
+      {/* 概览 */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="card !p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-md bg-pulse/10 text-pulse flex items-center justify-center"><Activity size={18} /></div>
+          <div>
+            <div className="text-lg font-semibold text-ink leading-none">{sessions.length}</div>
+            <div className="text-[12px] text-iron mt-1">累计工单</div>
           </div>
-          <nav className="flex items-center gap-1 text-sm">
-            <button onClick={() => nav('/interview/new')} className="px-3 py-1.5 rounded-md text-mist hover:text-ink hover:bg-void transition-colors">模拟面试</button>
-            <button onClick={() => nav('/prep/new')} className="px-3 py-1.5 rounded-md text-mist hover:text-ink hover:bg-void transition-colors">面试准备</button>
-            <button onClick={() => nav('/resume')} className="px-3 py-1.5 rounded-md text-mist hover:text-ink hover:bg-void transition-colors">简历定制</button>
-            <button onClick={() => nav('/settings')} className="ml-2 px-3 py-1.5 rounded-md border text-mist hover:text-ink hover:bg-void transition-colors">设置</button>
-          </nav>
         </div>
-      </header>
-
-      {/* 首屏 */}
-      <section className="max-w-5xl mx-auto px-6 pt-16 pb-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-ink tracking-tight">把每一次面试准备，变成有把握的练习</h1>
-        <p className="text-mist mt-3 max-w-2xl leading-relaxed">
-          输入岗位 JD，AI 面试官实时追问、按 STAR 结构评分；简历与 JD 自动匹配，输出定制简历和面试准备文档，全流程归档。
-        </p>
-        <div className="flex gap-3 mt-6">
-          <button onClick={() => nav('/interview/new')} className="btn-primary">开始模拟面试</button>
-          <button onClick={() => nav('/resume')} className="btn-secondary">定制简历</button>
+        <div className="card !p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-md bg-success/10 text-success flex items-center justify-center"><CheckCircle2 size={18} /></div>
+          <div>
+            <div className="text-lg font-semibold text-ink leading-none">M1–M4</div>
+            <div className="text-[12px] text-iron mt-1">全流水线就绪</div>
+          </div>
         </div>
-      </section>
+        <div className="card !p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-md bg-ember/10 text-ember flex items-center justify-center"><Clock size={18} /></div>
+          <div>
+            <div className="text-lg font-semibold text-ink leading-none">
+              {sessions[0]?.date?.slice(0, 10) || '—'}
+            </div>
+            <div className="text-[12px] text-iron mt-1">最近活跃</div>
+          </div>
+        </div>
+      </div>
 
-      {/* 功能模式卡片 */}
-      <section className="max-w-5xl mx-auto px-6 pb-16">
+      {/* 功能入口 */}
+      <section>
+        <h2 className="text-[13px] font-semibold text-mist mb-3">功能模块</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {modes.map((m) => (
-            <button
-              key={m.to}
-              onClick={() => nav(m.to)}
-              className="card text-left hover:shadow-card-hover flex flex-col"
-            >
-              <div className="w-10 h-10 rounded-lg bg-void flex items-center justify-center text-xl mb-4">{m.icon}</div>
-              <h2 className="text-lg font-semibold text-ink mb-2">{m.title}</h2>
-              <p className="text-sm text-mist leading-relaxed flex-1">{m.desc}</p>
-              <div className="text-sm text-pulse font-medium mt-4">{m.cta} →</div>
-            </button>
-          ))}
+          {entries.map((m) => {
+            const Icon = m.icon;
+            return (
+              <button key={m.to} onClick={() => nav(m.to)} className="card text-left hover:shadow-card-hover flex flex-col !p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-9 h-9 rounded-md bg-void text-pulse flex items-center justify-center"><Icon size={18} /></div>
+                  <span className="text-[14px] font-semibold text-ink">{m.title}</span>
+                </div>
+                <p className="text-[13px] text-mist leading-relaxed flex-1">{m.desc}</p>
+                <div className="flex items-center gap-1 text-[13px] text-pulse font-medium mt-4">
+                  {m.cta} <ArrowRight size={14} />
+                </div>
+              </button>
+            );
+          })}
         </div>
       </section>
 
       {/* 最近记录 */}
-      {sessions.length > 0 && (
-        <section className="max-w-5xl mx-auto px-6 pb-20">
-          <h3 className="text-sm font-semibold text-mist mb-3">最近记录</h3>
-          <div className="card divide-y">
-            {sessions.slice(0, 5).map((s) => (
-              <button
-                key={s.id}
-                onClick={() => nav(s.type === 'prep' ? `/prep/${s.id}` : `/interview/${s.id}`)}
-                className="w-full text-left px-5 py-3.5 flex items-center gap-3 hover:bg-void transition-colors"
-              >
-                <span className="text-lg">{s.type === 'prep' ? '📝' : '📄'}</span>
-                <div>
-                  <div className="text-sm font-medium text-ink">{s.company} {s.position}</div>
-                  <div className="text-xs text-iron mt-0.5">{s.date} · {s.type === 'prep' ? '面试准备' : '模拟面试'}</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <footer className="border-t py-6 text-center">
-        <p className="text-xs text-iron">AI 面试助手 · 本地运行 · 数据不出本机</p>
-      </footer>
+      <section>
+        <h2 className="text-[13px] font-semibold text-mist mb-3">最近记录</h2>
+        <div className="card !p-0 overflow-hidden">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="border-b bg-void/60 text-iron text-left">
+                <th className="px-4 py-2.5 font-medium">类型</th>
+                <th className="px-4 py-2.5 font-medium">岗位 / 公司</th>
+                <th className="px-4 py-2.5 font-medium">日期</th>
+                <th className="px-4 py-2.5 font-medium w-20" />
+              </tr>
+            </thead>
+            <tbody>
+              {sessions.length === 0 ? (
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-iron">暂无记录，从上方功能模块开始</td></tr>
+              ) : (
+                sessions.slice(0, 6).map((s) => (
+                  <tr key={s.id} className="border-b last:border-0 hover:bg-void/40 transition-colors cursor-pointer"
+                      onClick={() => nav(s.type === 'prep' ? `/prep/${s.id}` : `/interview/${s.id}`)}>
+                    <td className="px-4 py-2.5">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[12px] ${s.type === 'prep' ? 'bg-success/10 text-success' : 'bg-pulse/10 text-pulse'}`}>
+                        {s.type === 'prep' ? '面试准备' : '模拟面试'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-ink">{s.company} {s.position}</td>
+                    <td className="px-4 py-2.5 text-iron">{s.date}</td>
+                    <td className="px-4 py-2.5 text-right text-iron"><ArrowRight size={14} /></td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }

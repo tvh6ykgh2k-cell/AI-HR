@@ -1,29 +1,25 @@
-/* ── AI 面试官平台 · Commercial SaaS ── */
-/* 浅色专业风：白卡片 / 标准灰边 / 专业蓝主色 / 干净克制动效 */
+/* ── 企业后台 · Arco 风格（飞书 / Ant Design Pro 同族）── */
+/* 灰底 + 白卡 + Arco 蓝 #165DFF + 线性图标，克制、高密度、零装饰 */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── 1. Design Tokens (CSS custom properties) ── */
 @layer base {
   :root {
-    /* 浅色 SaaS 基色（保持类名不变，只翻值） */
-    --void:    #F5F7FA;   /* 页面底色 — 浅灰 */
-    --surface: #FFFFFF;   /* 卡片 / 输入 — 纯白 */
-    --ink:     #1F2937;   /* 主文字 — 深灰（slate-800） */
-    --mist:    #64748B;   /* 次文字 — slate-500 */
-    --iron:    #94A3B8;   /* 辅助 / 占位 — slate-400 */
-    --pulse:   #2563EB;   /* 主色 — 专业蓝（blue-600） */
-    --ember:   #D97706;   /* 次要 / 警示 — 琥珀（amber-600） */
-    --border:  #E5E7EB;   /* 卡片描边 — slate-200 */
-    --border-hover: #D1D5DB; /* slate-300 */
+    --void:     #F0F1F5;
+    --surface:  #FFFFFF;
+    --ink:      #1D2129;
+    --mist:     #4E5969;
+    --iron:     #86909C;
+    --pulse:    #165DFF;
+    --ember:    #FF7D00;
+    --border:   #E5E6EB;
+    --border-hover: #C9CDD4;
 
     --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
-    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* ── 2. Base reset ── */
   *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -41,49 +37,34 @@
     background-color: var(--void);
     color: var(--ink);
     font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.6;
     overflow-x: hidden;
     min-height: 100dvh;
   }
 
-  /* ── 4. Content layer ── */
   #root {
     position: relative;
     z-index: 1;
   }
 
-  /* ── 5. Focus ring（可见、可访问）── */
   :focus-visible {
     outline: 2px solid var(--pulse);
     outline-offset: 2px;
     border-radius: 4px;
   }
 
-  /* ── 6. Selection ── */
   ::selection {
-    background-color: rgba(37, 99, 235, 0.15);
+    background-color: rgba(22, 93, 255, 0.15);
     color: var(--ink);
   }
 
-  /* ── 7. Scrollbar（浅色）── */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #CBD5E1;
-    border-radius: 4px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #94A3B8;
-  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #C9CDD4; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #86909C; }
 }
 
-/* ── 8. Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -92,104 +73,90 @@
   }
 }
 
-/* ── 9. 组件 ── */
 @layer components {
-  /* 白卡片 + 标准灰边 + 轻阴影 */
+  /* 白卡片 */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
   .card:hover {
     border-color: var(--border-hover);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.08);
   }
 
   /* 输入框 */
   .input-field {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 16px;
+    border-radius: 6px;
+    padding: 8px 12px;
     color: var(--ink);
-    font-size: 15px;
+    font-size: 14px;
     font-family: inherit;
     transition: border-color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
   }
   .input-field:focus {
     border-color: var(--pulse);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
   }
-  .input-field::placeholder {
-    color: var(--iron);
-  }
+  .input-field::placeholder { color: var(--iron); }
 
-  /* 主按钮 — 专业蓝 */
+  /* 主按钮 */
   .btn-primary {
     background: var(--pulse);
     color: #FFFFFF;
     border: none;
-    border-radius: 8px;
-    padding: 12px 24px;
-    font-weight: 600;
-    font-size: 15px;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
-  }
-  .btn-primary:hover {
-    background: #1D4ED8;
-  }
-  .btn-primary:active {
-    background: #1E40AF;
-  }
-  .btn-primary:disabled {
-    background: #93C5FD;
-    cursor: not-allowed;
-  }
-
-  /* 次按钮 / 幽灵按钮 */
-  .btn-secondary {
-    background: var(--surface);
-    color: #334155;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 20px;
+    border-radius: 6px;
+    padding: 8px 16px;
     font-weight: 500;
     font-size: 14px;
     font-family: inherit;
     cursor: pointer;
-    transition: background 0.15s var(--ease-out), border-color 0.15s var(--ease-out);
+    transition: background 0.15s var(--ease-out);
+  }
+  .btn-primary:hover { background: #408BFF; }
+  .btn-primary:active { background: #0E4BD9; }
+  .btn-primary:disabled { background: #94BCFF; cursor: not-allowed; }
+
+  /* 次按钮 */
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--mist);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 15px;
+    font-weight: 500;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s var(--ease-out), color 0.15s var(--ease-out);
   }
   .btn-secondary:hover {
-    background: #F8FAFC;
     border-color: var(--border-hover);
+    color: var(--ink);
   }
-  .btn-secondary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
-/* ── 10. 克制的进入动画（商业 SaaS：淡入 + 轻微上移，无逐字/无 3D）── */
 @layer utilities {
-  /* 骨架屏：浅灰 + shimmer */
+  /* 骨架屏 */
   .skel {
     position: relative;
     overflow: hidden;
-    background: #EEF2F7;
-    border-radius: 8px;
+    background: #F2F3F5;
+    border-radius: 6px;
   }
   .skel::after {
     content: '';
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-    animation: skel-shimmer 1.4s var(--ease-in-out) infinite;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+    animation: skel-shimmer 1.4s ease-in-out infinite;
   }
   @keyframes skel-shimmer {
     100% { transform: translateX(100%); }

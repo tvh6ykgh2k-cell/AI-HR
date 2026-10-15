@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { File } from 'lucide-react';
 
 interface Props {
   title: string;            // 区块标题，如 "上传简历"
@@ -66,7 +67,7 @@ export default function FileUpload({ title, hint, accept, onText, loading, initi
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-sm text-ink">{title}</h3>
-        {fileName && <span className="text-xs text-pulse">📄 {fileName}</span>}
+        {fileName && <span className="text-xs text-pulse flex items-center gap-1"><File size={12} /> {fileName}</span>}
       </div>
 
       {/* 文件选择 / 拖拽 */}

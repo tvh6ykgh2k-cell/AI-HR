@@ -16,7 +16,7 @@ export const tokens = {
   ember:   '#D97706',   // 次要 / 警示 — 琥珀（amber-600）
 
   // ── Semantic roles ──
-  border:      '#E5E7EB',   // 卡片描边 — slate-200
+  border:      '#26262C',   // hairline — 暗灰
   borderHover: '#D1D5DB',   // hover — slate-300
 
   // ── State colors ──
@@ -81,7 +81,7 @@ export const fontStack = {
 export const semantic = {
   // Chat bubbles
   bubbleAI:     '#FFFFFF',   // 面试官气泡（白底 + 描边）
-  bubbleUser:   '#EFF6FF',   // 用户气泡 — 蓝 tint（blue-50）
+  bubbleUser:   '#1B1E3A',   // 用户气泡 — 暗靛 tint
 
   // STAR scoring
   starComplete:   tokens.pulse,

@@ -1,5 +1,5 @@
-/* ── 企业后台 · Arco 风格（飞书 / Ant Design Pro 同族）── */
-/* 灰底 + 白卡 + Arco 蓝 #165DFF + 线性图标，克制、高密度、零装饰 */
+/* ── 方案 B · Linear / Vercel 暗色极简 ── */
+/* 纯黑底 + 1px hairline + 单一靛蓝 accent + 零阴影 + 13px 小字体系 */
 
 @tailwind base;
 @tailwind components;
@@ -7,15 +7,15 @@
 
 @layer base {
   :root {
-    --void:     #F0F1F5;
-    --surface:  #FFFFFF;
-    --ink:      #1D2129;
-    --mist:     #4E5969;
-    --iron:     #86909C;
-    --pulse:    #165DFF;
-    --ember:    #FF7D00;
-    --border:   #E5E6EB;
-    --border-hover: #C9CDD4;
+    --void:     #0A0A0A;
+    --surface:  #121214;
+    --ink:      #EDEDF2;
+    --mist:     #9EA0AA;
+    --iron:     #6E6E76;
+    --pulse:    #5E6AD2;
+    --ember:    #FFB224;
+    --border:   #26262C;
+    --border-hover: #3A3A42;
 
     --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -37,7 +37,7 @@
     background-color: var(--void);
     color: var(--ink);
     font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.6;
     overflow-x: hidden;
     min-height: 100dvh;
@@ -55,14 +55,14 @@
   }
 
   ::selection {
-    background-color: rgba(22, 93, 255, 0.15);
+    background-color: rgba(94, 106, 210, 0.3);
     color: var(--ink);
   }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #C9CDD4; border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: #86909C; }
+  ::-webkit-scrollbar-thumb { background: #2E2E33; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #45454C; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -74,38 +74,36 @@
 }
 
 @layer components {
-  /* 白卡片 */
+  /* 卡片：纯 1px hairline，零阴影 */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
   .card:hover {
     border-color: var(--border-hover);
-    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.08);
   }
 
   /* 输入框 */
   .input-field {
-    background: var(--surface);
+    background: #0E0E10;
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 8px 12px;
     color: var(--ink);
-    font-size: 14px;
+    font-size: 13px;
     font-family: inherit;
     transition: border-color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
   }
   .input-field:focus {
     border-color: var(--pulse);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
+    box-shadow: 0 0 0 2px rgba(94, 106, 210, 0.15);
   }
   .input-field::placeholder { color: var(--iron); }
 
-  /* 主按钮 */
+  /* 主按钮 — 靛蓝 */
   .btn-primary {
     background: var(--pulse);
     color: #FFFFFF;
@@ -113,41 +111,42 @@
     border-radius: 6px;
     padding: 8px 16px;
     font-weight: 500;
-    font-size: 14px;
+    font-size: 13px;
     font-family: inherit;
     cursor: pointer;
     transition: background 0.15s var(--ease-out);
   }
-  .btn-primary:hover { background: #408BFF; }
-  .btn-primary:active { background: #0E4BD9; }
-  .btn-primary:disabled { background: #94BCFF; cursor: not-allowed; }
+  .btn-primary:hover { background: #6C77DC; }
+  .btn-primary:active { background: #4C58C4; }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  /* 次按钮 */
+  /* 次按钮 — 幽灵 */
   .btn-secondary {
-    background: var(--surface);
+    background: transparent;
     color: var(--mist);
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 7px 15px;
     font-weight: 500;
-    font-size: 14px;
+    font-size: 13px;
     font-family: inherit;
     cursor: pointer;
-    transition: border-color 0.15s var(--ease-out), color 0.15s var(--ease-out);
+    transition: border-color 0.15s var(--ease-out), color 0.15s var(--ease-out), background 0.15s var(--ease-out);
   }
   .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.04);
     border-color: var(--border-hover);
     color: var(--ink);
   }
-  .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
 @layer utilities {
-  /* 骨架屏 */
+  /* 骨架屏 — 暗色 */
   .skel {
     position: relative;
     overflow: hidden;
-    background: #F2F3F5;
+    background: #1C1C21;
     border-radius: 6px;
   }
   .skel::after {
@@ -155,7 +154,7 @@
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
     animation: skel-shimmer 1.4s ease-in-out infinite;
   }
   @keyframes skel-shimmer {

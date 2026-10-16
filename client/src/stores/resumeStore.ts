@@ -141,6 +141,7 @@ export interface ArchiveResult {
   saved: boolean;
   hasPlaceholders: boolean;
   interviewPrepSessionId: string | null;
+  interviewScriptSessionId?: string | null;
 }
 
 type Phase =

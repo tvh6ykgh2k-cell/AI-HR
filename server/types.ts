@@ -288,5 +288,6 @@ export interface ResumeSessionPayload {
   match?: MatchReport;
   tailored?: TailoredResume;
   interviewPrepSessionId?: string;   // 若已生成面试准备文档
+  interviewScriptSessionId?: string; // 若已生成 M5 面试逐字稿
   notes?: string;
 }

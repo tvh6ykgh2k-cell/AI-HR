@@ -17,6 +17,7 @@ import type {
   LayoutRequest,
   ResumeSessionPayload,
   InterviewScriptRequest,
+  SessionMeta,
 } from '../types.js';
 
 export const resumeRoute = new Hono();
@@ -110,7 +111,7 @@ resumeRoute.post('/interview-script', async (c) => {
       sanitize((script.title || '').split(/[·:：]/)[0]) ||
       '岗位';
     const baseId = `逐字稿-${sanitize(roleLabel)}-${today}`;
-    const candidate = (n?: number) => ({
+    const candidate = (n?: number): SessionMeta => ({
       id: n ? `${baseId}-${n}` : baseId,
       date: today,
       company: jdAnalysis?.company || '',
@@ -229,6 +230,7 @@ resumeRoute.post('/session', async (c) => {
       saved: true,
       hasPlaceholders: (payload.tailored?.placeholders?.length || 0) > 0,
       interviewPrepSessionId: payload.interviewPrepSessionId || null,
+      interviewScriptSessionId: payload.interviewScriptSessionId || null,
     });
   } catch (err: any) {
     return c.json({ error: err.message }, 500);
@@ -300,6 +302,11 @@ function buildResumeSessionMarkdown(p: ResumeSessionPayload): string {
   if (p.interviewPrepSessionId) {
     md += `## 关联面试准备\n\n`;
     md += `> 面试准备文档：${p.interviewPrepSessionId}\n\n`;
+  }
+
+  if (p.interviewScriptSessionId) {
+    md += `## 关联面试逐字稿（M5）\n\n`;
+    md += `> 逐字稿工单：${p.interviewScriptSessionId}\n\n`;
   }
 
   if (p.notes) md += `## 备注\n\n${p.notes}\n`;

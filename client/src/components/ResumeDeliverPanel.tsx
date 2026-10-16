@@ -262,6 +262,7 @@ export default function ResumeDeliverPanel() {
         match: store.match || undefined,
         tailored: store.tailored || undefined,
         interviewPrepSessionId: store.prep?.sessionId || undefined,
+        interviewScriptSessionId: store.interviewScript?.sessionId || undefined,
         notes: notes.trim() || undefined,
       });
       store.setArchive(res);
@@ -684,6 +685,9 @@ export default function ResumeDeliverPanel() {
               {store.archive.hasPlaceholders && <span className="text-ember">（含待补占位）</span>}
               {store.archive.interviewPrepSessionId && (
                 <span className="text-iron"> · 已关联面试准备 {store.archive.interviewPrepSessionId}</span>
+              )}
+              {store.archive.interviewScriptSessionId && (
+                <span className="text-iron"> · 已关联逐字稿 {store.archive.interviewScriptSessionId}</span>
               )}
             </div>
           )}

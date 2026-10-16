@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { readSettings, createSessionFile } from '../services/obsidian.js';
+import { readSettings, createSessionFile, sessionExists } from '../services/obsidian.js';
 import {
   analyzeJD,
   parseResume,
@@ -100,21 +100,29 @@ resumeRoute.post('/interview-script', async (c) => {
       settings.model || undefined
     );
 
-    // 生成即存档：独立工单（id 加 -script 后缀，避免与 M4 简历工单 / M4 prep 冲突）
+    // 生成即存档：友好文件名 逐字稿-<岗位>-<日期>.md（同目录重名自动 -2/-3）
     const today = new Date().toISOString().slice(0, 10);
-    const sessionId = `${today}-script-${Date.now()}`;
+    const sanitize = (s: string) =>
+      s.replace(/[\\/:*?"<>|]/g, ' ').replace(/\s+/g, ' ').trim();
+    // 岗位名：优先 JD 解析结果；没有则从 LLM 生成的标题取首段（如"CRM 实施顾问 · 模拟面试…"）
+    const roleLabel =
+      jdAnalysis?.role?.trim() ||
+      sanitize((script.title || '').split(/[·:：]/)[0]) ||
+      '岗位';
+    const baseId = `逐字稿-${sanitize(roleLabel)}-${today}`;
+    const candidate = (n?: number) => ({
+      id: n ? `${baseId}-${n}` : baseId,
+      date: today,
+      company: jdAnalysis?.company || '',
+      position: roleLabel,
+      type: 'resume',
+      tags: ['面试逐字稿', '模拟面试'],
+    });
+    let meta = candidate();
+    for (let n = 2; await sessionExists(meta) && n < 100; n++) meta = candidate(n);
     const markdown = buildInterviewScriptMarkdown(script, jdAnalysis?.role || '');
-    await createSessionFile(
-      {
-        id: `${sessionId}`,
-        date: today,
-        company: jdAnalysis?.company || '',
-        position: jdAnalysis?.role || script.title || '',
-        type: 'resume',
-        tags: ['面试逐字稿', '模拟面试'],
-      },
-      markdown
-    );
+    await createSessionFile(meta, markdown);
+    const sessionId = meta.id;
 
     return c.json({ ...script, sessionId });
   } catch (err: any) {

@@ -135,6 +135,50 @@ export async function recognizeJD(
   return data.choices[0].message.content;
 }
 
+// 识别简历截图（图片模型）→ 纯文本，写回 resumeText
+export async function recognizeResume(
+  imageBase64: string,
+  apiKeyOverride?: string,
+  modelOverride?: string
+): Promise<string> {
+  const apiKey = getApiKey(apiKeyOverride);
+
+  const response = await fetch(`${BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: modelOverride || IMAGE_MODEL,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `请把这张简历截图中的文字完整提取出来，保持原有段落结构和换行，输出纯文本（不要 markdown 代码块、不要 JSON、不要任何解释说明）。`,
+            },
+            {
+              type: 'image_url',
+              image_url: { url: `data:image/png;base64,${imageBase64}` },
+            },
+          ],
+        },
+      ],
+      stream: false,
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Resume recognition failed: ${response.status} — ${errText}`);
+  }
+
+  const data = (await response.json()) as any;
+  return (data.choices[0].message.content || '').trim();
+}
+
 // Generate interview prep document from JD + optional resume
 export async function generatePrep(
   jdText: string,

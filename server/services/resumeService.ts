@@ -5,6 +5,8 @@ import type {
   MatchRequest,
   TailoredResume,
   TailorRequest,
+  InterviewScript,
+  InterviewScriptRequest,
 } from '../types.js';
 
 const BASE_URL = process.env.AGNES_BASE_URL || 'https://apihub.agnes-ai.com/v1';
@@ -15,6 +17,35 @@ function getApiKey(overrideKey?: string): string {
   // ESM: 必须在调用时实时读 process.env（dotenv 在 index.ts 顶层才加载，
   // 而 import 会被提升到它之前执行 → 模块加载期捕获的常量恒为 ''）
   return overrideKey || process.env.AGNES_API_KEY || API_KEY;
+}
+
+// 截断 JSON 兜底修复：模型输出被砍断时，闭合未结束的字符串与花/方括号
+function repairTruncatedJson(raw: string): string | null {
+  const start = raw.indexOf('{');
+  if (start < 0) return null;
+  const body = raw.slice(start);
+  let inStr = false;
+  let esc = false;
+  const stack: string[] = [];
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    if (esc) { esc = false; continue; }
+    if (ch === '\\') { esc = true; continue; }
+    if (ch === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (ch === '{') stack.push('}');
+    else if (ch === '[') stack.push(']');
+    else if (ch === '}' || ch === ']') stack.pop();
+  }
+  // 逐字符回退到最后一个合法边界（去掉悬空的冒号/逗号/残词）
+  let s = body;
+  if (inStr) s += '"'; // 闭合未结束的字符串
+  // 去掉尾部的悬挂分隔符
+  s = s.replace(/[\s,]+$/, '');
+  // 若尾字符是 `:` 或 `"`（残缺键值），丢弃最后不完整的键值对
+  s = s.replace(/:["\s]?$/, '');
+  while (stack.length) s += stack.pop()!;
+  return s;
 }
 
 async function agnesJson<T>(
@@ -33,6 +64,8 @@ async function agnesJson<T>(
       model: modelOverride || TEXT_MODEL,
       messages: [{ role: 'user', content: prompt }],
       stream: false,
+      max_tokens: 8192,                    // M2 等大 JSON 输出别被默认上限砍断
+      response_format: { type: 'json_object' }, // 强制 JSON 输出
     }),
   });
 
@@ -47,6 +80,15 @@ async function agnesJson<T>(
   try {
     return JSON.parse(content) as T;
   } catch {
+    // 兜底：被截断的 JSON 做括号配平修复后再试
+    const repaired = repairTruncatedJson(content);
+    if (repaired) {
+      try {
+        return JSON.parse(repaired) as T;
+      } catch {
+        /* fallthrough */
+      }
+    }
     throw new Error(`${label}: 模型未返回合法 JSON。原始输出：${content.slice(0, 300)}...`);
   }
 }
@@ -306,4 +348,96 @@ ${matchCtx}
   (tailored.highlights ?? []).forEach((h) => collect(`${h.value} ${h.label ?? ''}`));
   tailored.placeholders = [...new Set([...(tailored.placeholders ?? []), ...scanned])];
   return tailored;
+}
+
+// ─────────────────────────────────────────────
+// ⑦ 面试逐字稿（M5，LLM，不造假：候选人回答只基于原简历事实，缺数据用 [待补充] 占位）
+// 产出「可直接照念」的模拟面试对话体：开场自我介绍 + 分轮问答（含追问）+ 反问 + 高风险题 + 备考要点
+// ─────────────────────────────────────────────
+export async function generateInterviewScript(
+  req: InterviewScriptRequest,
+  apiKeyOverride?: string,
+  modelOverride?: string
+): Promise<InterviewScript> {
+  const { jdText, resumeText, jdAnalysis, match } = req;
+
+  const jdCtx = jdAnalysis
+    ? `【JD 解析】岗位=${jdAnalysis.role} 硬性要求=${JSON.stringify(jdAnalysis.mustHave)} 加分项=${JSON.stringify(jdAnalysis.niceToHave)} 雇主重点=${JSON.stringify(jdAnalysis.top3Focus)}`
+    : '';
+  const matchCtx = match
+    ? `【匹配分析】匹配度=${match.score} 缺失关键词=${JSON.stringify(match.missingKeywords)} 内容缺口=${JSON.stringify(match.gaps)}`
+    : '';
+
+  const prompt = `你是资深面试官兼面试教练。请基于岗位 JD 与候选人简历，写一份**可直接照着念的面试逐字稿**（模拟面试对话）。
+
+【岗位 JD】
+"""
+${jdText}
+"""
+${jdCtx}
+
+【候选人简历（事实的唯一来源）】
+"""
+${resumeText}
+"""
+${matchCtx}
+
+请输出严格 JSON（不要 markdown 代码块，只要纯 JSON）：
+{
+  "title": "模拟面试标题（如：XX 岗位 · 模拟面试逐字稿）",
+  "meta": {
+    "duration": "预计时长（如 45-60 分钟）",
+    "format": "面试形式（如：一面 · 技术/项目面，1 对 1）",
+    "focus": ["面试官最可能深挖的 3-5 个点（来自岗位 mustHave/雇主重点/匹配缺口）"]
+  },
+  "selfIntro": {
+    "prompt": "面试官开场（逐字，如：'先请做一个自我介绍吧。'）",
+    "script": "候选人自我介绍逐字稿（90-180 字，口语化，围绕该岗位定制，可直接照念）"
+  },
+  "rounds": [
+    {
+      "name": "轮次名（如：项目经验深挖 / 专业能力 / 行为面试 / 动机与文化匹配 / 反问环节）",
+      "turns": [
+        {
+          "question": "面试官提问（逐字，口语化）",
+          "answer": "候选人参考回答（口语化、有结构、可直接照念；优先用简历里真实的项目/数字；缺具体数字写 [待补充]）",
+          "followUps": [
+            {"question": "追问（逐字）", "answer": "追问参考回答（逐字稿；缺数据写 [待补充]）"}
+          ],
+          "tip": "一条提示（得分点 / 风险点 / 容易被戳的软肋，供候选人备考）"
+        }
+      ]
+    }
+  ],
+  "questionsToAsk": ["候选人反问面试官的逐字稿（可直接说出口，围绕岗位真实关心点，3-5 条）"],
+  "pitfalls": ["高风险/陷阱题 + 应对（如 '你的离职原因 / 为什么 2 年换 3 次工作 / 期望薪资'，逐字给应对话术）"],
+  "tips": ["备考注意（如：哪些数字现在必须补上、哪个项目要被问到就要主动展开、着装/时间等 3-5 条）"]
+}
+
+要求：
+- rounds 覆盖 3-4 个轮次，每个轮次 2-4 个 turns；整体 10-14 个 questions。
+- 问题必须**由该 JD + 这份简历**驱动：优先深挖简历里最相关的经历、以及匹配分析暴露的缺口/缺失关键词。
+- 候选人回答一律**口语化、第一人称、可直接照念**；结构上先给结论/框架再给例子。
+- **不造假铁律**：回答里的事实、项目、数字只能来自原简历；原简历没有的具体数字，写 [待补充: 说明缺什么]，绝不编造。
+- followUps 每个 turn 至少 1 条，深挖型 turn 可 2-3 条。`;
+
+  const script = await agnesJson<InterviewScript>(prompt, apiKeyOverride, modelOverride, '面试逐字稿');
+
+  // 兜底补全：LLM 偶发漏字段时不炸前端
+  script.rounds ??= [];
+  script.rounds.forEach((r) => {
+    r.turns ??= [];
+    r.turns.forEach((t) => {
+      t.followUps ??= [];
+      t.question = t.question || '';
+      t.answer = t.answer || '';
+    });
+  });
+  script.questionsToAsk ??= [];
+  script.pitfalls ??= [];
+  script.tips ??= [];
+  script.meta ??= { duration: '', format: '', focus: [] };
+  script.meta.focus ??= [];
+  script.selfIntro ??= { prompt: '', script: '' };
+  return script;
 }

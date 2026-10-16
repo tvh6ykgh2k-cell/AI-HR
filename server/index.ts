@@ -30,6 +30,7 @@ import { serve } from '@hono/node-server';
 import { settingsRoute } from './routes/settings.js';
 import { chatRoute } from './routes/chat.js';
 import { recognizeJdRoute } from './routes/recognize-jd.js';
+import { recognizeResumeRoute } from './routes/recognize-resume.js';
 import { prepRoute } from './routes/prep.js';
 import { sessionsRoute } from './routes/sessions.js';
 import { resumeRoute } from './routes/resume.js';
@@ -51,6 +52,7 @@ app.get('/api/health', (c) => {
 app.route('/api/settings', settingsRoute);
 app.route('/api/chat', chatRoute);
 app.route('/api/recognize-jd', recognizeJdRoute);
+app.route('/api/recognize-resume', recognizeResumeRoute);
 app.route('/api/prep', prepRoute);
 app.route('/api/sessions', sessionsRoute);
 app.route('/api/resume', resumeRoute);

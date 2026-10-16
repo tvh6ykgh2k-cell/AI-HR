@@ -2,13 +2,14 @@ import { useResumeStore } from '../stores/resumeStore';
 
 // 流水线状态轨：M1 输入解析 → M2 匹配 → M3 定制排版 → M4 准备存档
 // finesse · product register：紧凑高密度，首屏可见进度，不做装饰性动效（仅 breath 呼吸点标记当前步）
-type StepKey = 'm1' | 'm2' | 'm3' | 'm4';
+type StepKey = 'm1' | 'm2' | 'm3' | 'm4' | 'm5';
 
 const STEPS: { key: StepKey; label: string }[] = [
   { key: 'm1', label: 'M1 · 输入解析' },
   { key: 'm2', label: 'M2 · 匹配分析' },
   { key: 'm3', label: 'M3 · 定制排版' },
   { key: 'm4', label: 'M4 · 准备存档' },
+  { key: 'm5', label: 'M5 · 面试逐字稿' },
 ];
 
 export default function PipelineStepper() {
@@ -21,6 +22,7 @@ export default function PipelineStepper() {
       case 'm2': return Boolean(s.match);
       case 'm3': return Boolean(s.tailored);
       case 'm4': return Boolean(s.archive?.saved);
+      case 'm5': return Boolean(s.interviewScript);
     }
   };
 
@@ -29,6 +31,7 @@ export default function PipelineStepper() {
     : s.phase === 'matching' ? 'm2'
     : s.phase === 'tailoring' ? 'm3'
     : s.phase === 'preparing' || s.phase === 'archiving' ? 'm4'
+    : s.phase === 'interview-script' ? 'm5'
     : null;
 
   return (

@@ -97,7 +97,7 @@ export default function FileUpload({ title, hint, accept, onText, loading, initi
           <div className="animate-pulse text-mist text-sm">{loading ? '解析中...' : '读取文件...'}</div>
         ) : (
           <>
-            <div className="text-2xl mb-1">📎</div>
+            <File size={18} className="text-mist mb-1" />
             <p className="text-mist text-sm">点击选择或拖入文件</p>
             <p className="text-iron text-xs mt-1">{hint || '支持 .pdf / .docx / .txt / .md'}</p>
           </>

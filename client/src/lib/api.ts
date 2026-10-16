@@ -20,6 +20,8 @@ export const api = {
     request<any>('/chat/save-qa', { method: 'POST', body: JSON.stringify({ sessionId, question, answer }) }),
   recognizeJD: (imageBase64: string) =>
     request<any>('/recognize-jd', { method: 'POST', body: JSON.stringify({ imageBase64 }) }),
+  recognizeResume: (imageBase64: string) =>
+    request<any>('/recognize-resume', { method: 'POST', body: JSON.stringify({ imageBase64 }) }),
   generatePrep: (jdText: string, resumeText?: string) =>
     request<any>('/prep/generate', { method: 'POST', body: JSON.stringify({ jdText, resumeText }) }),
   scoreStar: (question: string, answer: string, jdContext: string) =>
@@ -38,8 +40,17 @@ export const api = {
   // M3
   tailorResume: (jdText: string, resumeText: string, jdAnalysis?: any, match?: any) =>
     request<any>('/resume/tailor', { method: 'POST', body: JSON.stringify({ jdText, resumeText, jdAnalysis, match }) }),
-  layoutResume: (resume: any) =>
-    request<any>('/resume/layout', { method: 'POST', body: JSON.stringify({ resume }) }),
+  layoutResume: (resume: any, templateHtml?: string) =>
+    request<any>('/resume/layout', {
+      method: 'POST',
+      body: JSON.stringify(templateHtml ? { resume, templateHtml } : { resume }),
+    }),
+  // M5 面试逐字稿
+  generateInterviewScript: (jdText: string, resumeText: string, jdAnalysis?: any, match?: any) =>
+    request<any>('/resume/interview-script', {
+      method: 'POST',
+      body: JSON.stringify({ jdText, resumeText, jdAnalysis, match }),
+    }),
   // M4 整条流水线存档（jdText 必填；其余可缺）
   archiveResumeSession: (payload: any) =>
     request<any>('/resume/session', { method: 'POST', body: JSON.stringify(payload) }),

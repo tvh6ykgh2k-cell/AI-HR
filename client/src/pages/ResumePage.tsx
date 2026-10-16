@@ -75,9 +75,23 @@ function ScoreRing({ score }: { score: number }) {
 export default function ResumePage() {
   const store = useResumeStore();
   const [jdRecognizing, setJdRecognizing] = useState(false);
+  const [resumeRecognizing, setResumeRecognizing] = useState(false);
 
   const canAnalyzeJd = store.jdText.trim().length >= 10;
   const canParseResume = store.resumeText.trim().length >= 10;
+
+  const handleResumeImage = async (base64: string) => {
+    setResumeRecognizing(true);
+    store.setError(null);
+    try {
+      const r = await api.recognizeResume(base64);
+      store.setResumeText(r.text || '');
+    } catch (err: any) {
+      store.setError(err.message);
+    } finally {
+      setResumeRecognizing(false);
+    }
+  };
 
   const handleJdImage = async (base64: string) => {
     setJdRecognizing(true);
@@ -177,13 +191,22 @@ export default function ResumePage() {
             {store.phase === 'parsing-resume' ? '解析中…' : store.resumeParsed ? '重新解析' : '解析简历'}
           </button>
         ) : null}>
-          <FileUpload
-            title="上传或粘贴简历"
-            accept=".pdf,.docx,.doc,.txt,.md"
-            onText={(t) => store.setResumeText(t)}
-            initialValue={store.resumeText}
-            loading={store.phase === 'parsing-resume'}
-          />
+          <div className="space-y-3">
+            <ImagePaste
+              onImage={handleResumeImage}
+              loading={resumeRecognizing}
+              label="粘贴或拖入简历截图"
+              sub="Ctrl+V · JPG/PNG"
+            />
+            <FileUpload
+              title="或上传简历文件"
+              accept=".pdf,.docx,.doc,.txt,.md"
+              hint="支持 .pdf / .docx / .txt / .md（或上方截图识别）"
+              onText={(t) => store.setResumeText(t)}
+              initialValue={store.resumeText}
+              loading={store.phase === 'parsing-resume'}
+            />
+          </div>
         </Section>
 
         {/* 右：JD */}

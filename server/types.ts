@@ -229,15 +229,56 @@ export interface TailorRequest {
   match?: MatchReport;           // 已有匹配报告则复用，聚焦改 P0 项
 }
 
+// ⑥ 面试逐字稿（M5，LLM，不造假：候选人回答只基于原简历事实，缺数据用 [待补充] 占位）
+export interface InterviewFollowUp {
+  question: string;             // 追问
+  answer: string;              // 追问参考回答（逐字稿）
+}
+
+export interface InterviewTurn {
+  question: string;            // 面试官提问（逐字）
+  answer: string;              // 候选人参考回答（口语化，可直接照念；缺具体数据含 [待补充]）
+  followUps: InterviewFollowUp[];
+  tip?: string;                // 一条：得分点/风险点/注意点
+}
+
+export interface InterviewScript {
+  title: string;               // 模拟面试标题
+  meta: {
+    duration: string;          // 预计时长
+    format: string;            // 面试形式
+    focus: string[];          // 面试官最可能深挖的 3-5 点
+  };
+  selfIntro: {
+    prompt: string;           // 面试官开场（如"请做个自我介绍"）
+    script: string;          // 自我介绍逐字稿
+  };
+  rounds: { name: string; turns: InterviewTurn[] }[];
+  questionsToAsk: string[];   // 候选人反问逐字稿（可直接说出口）
+  pitfalls: string[];         // 高风险/陷阱题 + 应对
+  tips: string[];            // 备考注意
+  sessionId?: string;         // 自动存档到 Obsidian 后的工单号（后端回填）
+}
+
+export interface InterviewScriptRequest {
+  jdText: string;
+  resumeText: string;
+  jdAnalysis?: JdAnalysis;
+  match?: MatchReport;
+}
+
 // ⑤ 排版（确定性，无 LLM）
 export interface LayoutResult {
-  html: string;                  // 完整可交付 HTML（内嵌 kami 版式 CSS，可下载/打印为 PDF）
+  html: string;                  // 完整可交付 HTML（内嵌版式 CSS，可下载/打印为 PDF）
   fileName: string;
   placeholderCount: number;      // [待补充] 占位数量（>0 时前端提示补数据）
+  usedTemplate?: boolean;        // true = 用了用户自带模板
+  unfilledTokens?: string[];     // 模板里没匹配到数据的占位符
 }
 
 export interface LayoutRequest {
   resume: TailoredResume;
+  templateHtml?: string; // 用户自带模板（.html，含 {{占位符}}）；不传则用默认 kami 版式
 }
 
 // ⑥ 整条流水线存档（M4）

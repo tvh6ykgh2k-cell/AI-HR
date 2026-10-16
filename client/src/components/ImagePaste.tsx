@@ -1,8 +1,19 @@
 import { useState, useCallback, DragEvent } from 'react';
+import { ScanLine } from 'lucide-react';
 
-interface Props { onImage: (base64: string) => void; loading?: boolean; }
+interface Props {
+  onImage: (base64: string) => void;
+  loading?: boolean;
+  label?: string;
+  sub?: string;
+}
 
-export default function ImagePaste({ onImage, loading }: Props) {
+export default function ImagePaste({
+  onImage,
+  loading,
+  label = '粘贴或拖入 BOSS直聘 岗位截图',
+  sub = 'Ctrl+V · JPG/PNG',
+}: Props) {
   const [dragOver, setDragOver] = useState(false);
 
   const processFile = useCallback((file: File) => {
@@ -14,14 +25,25 @@ export default function ImagePaste({ onImage, loading }: Props) {
 
   return (
     <div
-      onPaste={(e) => { const items = e.clipboardData?.items; if (items) for (const item of items) { if (item.type.startsWith('image/')) { processFile(item.getAsFile()!); break; } } }}
+      onPaste={(e) => {
+        const items = e.clipboardData?.items;
+        if (items) for (const item of items) { if (item.type.startsWith('image/')) { processFile(item.getAsFile()!); break; } }
+      }}
       onDragOver={(e: DragEvent) => { e.preventDefault(); setDragOver(true); }}
       onDragLeave={() => setDragOver(false)}
       onDrop={(e: DragEvent) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); }}
       className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${dragOver ? 'border-pulse bg-pulse/5' : 'border hover:border-iron'}`}
     >
-      {loading ? <div className="animate-pulse text-mist">🔍 识别中...</div> : (
-        <><div className="text-3xl mb-2">📋</div><p className="text-mist">粘贴或拖入 BOSS直聘 岗位截图</p><p className="text-iron text-sm mt-1">Ctrl+V · JPG/PNG</p></>
+      {loading ? (
+        <div className="animate-pulse text-mist flex items-center justify-center gap-2">
+          <ScanLine size={16} /> 识别中…
+        </div>
+      ) : (
+        <>
+          <div className="text-iron mb-2 flex items-center justify-center"><ScanLine size={22} /></div>
+          <p className="text-mist">{label}</p>
+          <p className="text-iron text-sm mt-1">{sub}</p>
+        </>
       )}
     </div>
   );

@@ -1,13 +1,73 @@
-import { useState } from 'react';
-import { Rocket, Sparkles, Mic, Save, Layout, Download, ClipboardList, CircleCheck } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Rocket, Sparkles, Mic, Save, Layout, Download, ClipboardList, CircleCheck, FilePlus, ScrollText, Copy, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useResumeStore } from '../stores/resumeStore';
+import type { InterviewScript } from '../stores/resumeStore';
 import { api } from '../lib/api';
+
+// 可照抄的排版模板脚手架：用户改成自己的版式，保留 {{占位符}} 即可
+const EXAMPLE_TEMPLATE = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{name}} · {{targetTitle}}</title>
+<style>
+  /* 在这里写你自己简历模板的版式/配色/字体，越像你的原模板越好 */
+  body { font-family: "Source Han Serif SC", "Noto Serif CJK SC", serif; margin: 24px; color: #1a1a1a; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .meta { color: #666; font-size: 12px; }
+  section { margin: 14px 0; }
+  .sec-title { font-weight: 700; border-bottom: 1px solid #ddd; padding-bottom: 3px; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>{{name}} {{englishName}}</h1>
+    <div class="meta">{{targetTitle}} ｜ {{phone}} ｜ {{email}} ｜ {{location}}</div>
+  </header>
+
+  <section>
+    <div class="sec-title">个人简介</div>
+    <p>{{summary}}</p>
+  </section>
+
+  <section>
+    <div class="sec-title">核心数据</div>
+    <div>{{highlights}}</div>
+  </section>
+
+  <section>
+    <div class="sec-title">工作经历</div>
+    <div>{{experience}}</div>
+  </section>
+
+  <section>
+    <div class="sec-title">技能</div>
+    <div>{{skills}}</div>
+  </section>
+
+  <section>
+    <div class="sec-title">教育背景</div>
+    <div>{{education}}</div>
+  </section>
+
+  <section>
+    <div class="sec-title">证书</div>
+    <div>{{certifications}}</div>
+  </section>
+
+  <section>
+    <div class="sec-title">待补充数据</div>
+    <div>{{missingData}}</div>
+  </section>
+</body>
+</html>`;
 
 // M3/M4 交付面板：定制简历生成 → 排版预览/导出 → 面试准备 → 整单存档 Obsidian
 export default function ResumeDeliverPanel() {
   const store = useResumeStore();
   const [notes, setNotes] = useState('');
+  const tplRef = useRef<HTMLInputElement>(null);
 
   const ready = store.jdText.trim().length >= 10 && store.resumeText.trim().length >= 10;
 
@@ -27,19 +87,50 @@ export default function ResumeDeliverPanel() {
     }
   };
 
-  // M3 排版（确定性）
+  // M3 排版（确定性）— 有用户模板则按模板出，没有则默认版式
   const handleLayout = async () => {
     if (!store.tailored) return;
     store.setPhase('tailoring');
     store.setError(null);
     try {
-      const layout = await api.layoutResume(store.tailored);
+      const layout = await api.layoutResume(
+        store.tailored,
+        store.resumeTemplateHtml || undefined
+      );
       store.setLayout(layout);
     } catch (err: any) {
       store.setError(`排版生成失败：${err.message}`);
     } finally {
       store.setPhase('idle');
     }
+  };
+
+  // 上传用户自己的排版模板（.html，含 {{占位符}}）
+  const handleTemplateFile = async (file: File) => {
+    const text = await file.text();
+    if (!text.includes('{{')) {
+      alert('模板里没找到 {{占位符}}。至少需要 {{name}} / {{targetTitle}} / {{experience}} 等，可点「下载模板示例」看写法。');
+      return;
+    }
+    store.setResumeTemplate(text, file.name);
+    store.setLayout(null); // 模板变了，旧排版失效
+  };
+
+  const clearTemplate = () => {
+    store.clearResumeTemplate();
+    store.setLayout(null);
+  };
+
+  // 下载可照抄的模板示例（占位符脚手架）
+  const downloadTemplateExample = () => {
+    const sample = EXAMPLE_TEMPLATE;
+    const blob = new Blob([sample], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '简历模板示例.html';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // 下载排版 HTML（浏览器可直接打印为 PDF）
@@ -69,6 +160,96 @@ export default function ResumeDeliverPanel() {
     }
   };
 
+  // M5 面试逐字稿（LLM，不造假：缺数据留 [待补充]）
+  const [copied, setCopied] = useState(false);
+  const handleInterviewScript = async () => {
+    if (!ready) return;
+    store.setPhase('interview-script');
+    store.setError(null);
+    try {
+      const script = await api.generateInterviewScript(
+        store.jdText,
+        store.resumeText,
+        store.jdAnalysis || undefined,
+        store.match || undefined
+      );
+      store.setInterviewScript(script as InterviewScript);
+    } catch (err: any) {
+      store.setError(`面试逐字稿生成失败：${err.message}`);
+    } finally {
+      store.setPhase('idle');
+    }
+  };
+
+  // 逐字稿导出 Markdown / 复制全文
+  const buildScriptMarkdown = (sc: InterviewScript): string => {
+    const lines: string[] = [];
+    lines.push(`# ${sc.title || '模拟面试逐字稿'}`, '');
+    const m = sc.meta || {};
+    if (m.format || m.duration) lines.push(`> ${[m.format, m.duration].filter(Boolean).join(' · ')}`, '');
+    if (m.focus?.length) {
+      lines.push('**面试官最可能深挖**：');
+      m.focus.forEach((f) => lines.push(`- ${f}`));
+      lines.push('');
+    }
+    if (sc.selfIntro?.script) {
+      lines.push('## 开场 · 自我介绍', '');
+      if (sc.selfIntro.prompt) lines.push(`**面试官**：${sc.selfIntro.prompt}`, '');
+      lines.push(`**候选人**：${sc.selfIntro.script}`, '');
+    }
+    (sc.rounds || []).forEach((r) => {
+      lines.push(`## ${r.name || '问答'}`, '');
+      (r.turns || []).forEach((t, i) => {
+        lines.push(`### Q${i + 1}｜${t.question}`, '');
+        lines.push(`**候选人参考回答**：${t.answer || ''}`, '');
+        (t.followUps || []).forEach((f, j) => {
+          lines.push(`> 追问 ${j + 1}｜${f.question}`, `> ${f.answer || ''}`, '');
+        });
+        if (t.tip) lines.push(`_提示：${t.tip}_`, '');
+      });
+    });
+    if (sc.questionsToAsk?.length) {
+      lines.push('## 你的反问', '');
+      sc.questionsToAsk.forEach((q) => lines.push(`- ${q}`));
+      lines.push('');
+    }
+    if (sc.pitfalls?.length) {
+      lines.push('## 高风险 / 陷阱题', '');
+      sc.pitfalls.forEach((p) => lines.push(`- ${p}`));
+      lines.push('');
+    }
+    if (sc.tips?.length) {
+      lines.push('## 备考注意', '');
+      sc.tips.forEach((t) => lines.push(`- ${t}`));
+    }
+    return lines.join('\n');
+  };
+
+  const copyScript = async () => {
+    const sc = store.interviewScript;
+    if (!sc) return;
+    try {
+      await navigator.clipboard.writeText(buildScriptMarkdown(sc));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard 不可用时静默 */
+    }
+  };
+
+  const downloadScript = () => {
+    const sc = store.interviewScript;
+    if (!sc) return;
+    const md = buildScriptMarkdown(sc);
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `面试逐字稿-${(sc.meta?.format || 'interview').replace(/[\/\s]+/g, '-')}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // M4 整条流水线存档
   const handleArchive = async () => {
     if (!store.jdText.trim()) return;
@@ -94,8 +275,9 @@ export default function ResumeDeliverPanel() {
   const t = store.tailored;
   const layout = store.layout;
   const prep = store.prep;
-  // 仅 M3/M4 阶段视为"交付进行中"；M1 解析 / M2 匹配 不阻塞交付按钮
-  const busy = store.phase === 'tailoring' || store.phase === 'preparing' || store.phase === 'archiving';
+  const script = store.interviewScript;
+  // 仅 M3/M4/M5 阶段视为"交付进行中"；M1 解析 / M2 匹配 不阻塞交付按钮
+  const busy = store.phase === 'tailoring' || store.phase === 'preparing' || store.phase === 'interview-script' || store.phase === 'archiving';
   const canAct = ready && !busy;
 
   return (
@@ -119,6 +301,9 @@ export default function ResumeDeliverPanel() {
             </button>
             <button onClick={handlePrep} disabled={!canAct} className="btn-primary !text-xs !px-3 !py-1.5">
               <span className='flex items-center gap-1.5'>{store.phase === 'preparing' ? '生成中…' : prep ? '重新生成' : <><Mic size={13} /> 面试准备</>}</span>
+            </button>
+            <button onClick={handleInterviewScript} disabled={!canAct} className="btn-primary !text-xs !px-3 !py-1.5">
+              <span className='flex items-center gap-1.5'>{store.phase === 'interview-script' ? '生成中…' : script ? '重新生成逐字稿' : <><ScrollText size={13} /> 面试逐字稿</>}</span>
             </button>
           </div>
         </div>
@@ -233,18 +418,48 @@ export default function ResumeDeliverPanel() {
             )}
 
             {/* 排版操作 */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <button onClick={handleLayout} className="btn-primary !text-xs !px-3 !py-1.5">
-                <span className='flex items-center gap-1.5'>{layout ? '重新排版' : <><Layout size={13} /> 生成排版</>}</span>
-              </button>
-              {layout && (
-                <>
-                  <button onClick={downloadHtml} className="btn-secondary !text-xs !px-3 !py-1.5">下载 HTML（可打印为 PDF）</button>
-                  {layout.placeholderCount > 0 && (
-                    <span className="text-xs text-ember">含 {layout.placeholderCount} 处占位，补全后再出终稿</span>
-                  )}
-                </>
+            <div className="space-y-2 pt-1">
+              {/* 模板排版：上传自己的 .html 简历模板 */}
+              <div className="flex flex-wrap items-center gap-2 rounded-lg border border p-3 bg-void">
+                <div className="flex-1 min-w-[180px]">
+                  <div className="text-xs font-medium text-mist flex items-center gap-1.5"><FilePlus size={13} className="text-iron" /> 用你自己的简历模板排版</div>
+                  <div className="text-[11px] text-iron mt-1">上传 .html 模板（占位符用双花括号包裹：{"{{name}}"} / {"{{experience}}"} / {"{{summary}}"} 等）；不传则用默认版式</div>
+                </div>
+                <input ref={tplRef} type="file" accept=".html,.htm" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleTemplateFile(f); e.target.value = ''; }} />
+                <button onClick={() => tplRef.current?.click()} className="btn-secondary !text-xs !px-3 !py-1.5">
+                  <span className="flex items-center gap-1.5"><FilePlus size={13} /> {store.resumeTemplateName ? '更换模板' : '上传模板'}</span>
+                </button>
+                <button onClick={downloadTemplateExample} className="btn-secondary !text-xs !px-3 !py-1.5">
+                  <span className="flex items-center gap-1.5"><Download size={13} /> 下载模板示例</span>
+                </button>
+                {store.resumeTemplateName && (
+                  <button onClick={clearTemplate} className="btn-secondary !text-xs !px-3 !py-1.5 text-ember">移除模板（用默认版式）</button>
+                )}
+              </div>
+              {store.resumeTemplateName && (
+                <div className="text-[11px] text-iron flex items-center gap-1.5">
+                  <CircleCheck size={12} className="text-success" /> 已加载模板 <span className="text-mist font-medium">{store.resumeTemplateName}</span>，「生成排版」将按此模板出稿
+                </div>
               )}
+              <div className="flex flex-wrap items-center gap-2">
+                <button onClick={handleLayout} className="btn-primary !text-xs !px-3 !py-1.5">
+                  <span className='flex items-center gap-1.5'>{layout ? '重新排版' : <><Layout size={13} /> 生成排版</>}</span>
+                </button>
+                {layout && (
+                  <>
+                    <button onClick={downloadHtml} className="btn-secondary !text-xs !px-3 !py-1.5">下载 HTML（可打印为 PDF）</button>
+                    {layout.usedTemplate && (
+                      <span className="text-xs text-success">✓ 按你的模板排版</span>
+                    )}
+                    {layout.unfilledTokens && layout.unfilledTokens.length > 0 && (
+                      <span className="text-xs text-ember">模板里这些占位没匹配到数据：{layout.unfilledTokens.join('、')}</span>
+                    )}
+                    {layout.placeholderCount > 0 && (
+                      <span className="text-xs text-ember">含 {layout.placeholderCount} 处占位，补全后再出终稿</span>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
 
             {/* 排版预览 iframe */}
@@ -309,6 +524,139 @@ export default function ResumeDeliverPanel() {
                 <ul className="space-y-1">
                   {prep.questionsToAsk.flatMap((g) => g.questions).map((q, i) => (
                     <li key={i} className="text-sm text-mist"><span className="text-pulse mr-1">·</span>{q}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* M5 面试逐字稿 */}
+        {store.phase === 'interview-script' && (
+          <div className="space-y-3 border-t border pt-4 mt-4">
+            <div className="flex items-center gap-2">
+              <ScrollText size={15} className="text-iron" />
+              <span className="text-[13px] font-semibold text-mist">面试逐字稿生成中</span>
+            </div>
+            <div className="skel h-4 w-1/2" />
+            <div className="skel h-16 w-full" />
+            <div className="skel h-4 w-3/4" />
+            <div className="skel h-20 w-full" />
+            <div className="text-xs text-iron">正在撰写模拟面试逐字稿（LLM · 不造假：缺数据留 [待补充]）…</div>
+          </div>
+        )}
+
+        {script && (
+          <div className="space-y-5 text-sm border-t border pt-4 mt-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="text-[13px] font-semibold text-ink flex items-center gap-2">
+                <ScrollText size={15} className="text-pulse" />
+                {script.title || '模拟面试逐字稿'}
+                {script.sessionId && (
+                  <span className="text-[10px] text-iron font-normal">已存档 {script.sessionId}</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={copyScript} className="btn-secondary !text-xs !px-2.5 !py-1">
+                  <span className="flex items-center gap-1">
+                    {copied ? <><Check size={12} className="text-success" /> 已复制</> : <><Copy size={12} /> 复制</>}
+                  </span>
+                </button>
+                <button onClick={downloadScript} className="btn-secondary !text-xs !px-2.5 !py-1">
+                  <span className="flex items-center gap-1"><Download size={12} /> 导出 .md</span>
+                </button>
+              </div>
+            </div>
+
+            {script.meta && (script.meta.format || script.meta.duration) && (
+              <div className="flex flex-wrap gap-2">
+                {script.meta.format && <span className="text-xs px-2 py-1 rounded-full border border text-mist">{script.meta.format}</span>}
+                {script.meta.duration && <span className="text-xs px-2 py-1 rounded-full border border text-mist">预计 {script.meta.duration}</span>}
+              </div>
+            )}
+
+            {script.meta?.focus?.length > 0 && (
+              <div>
+                <div className="text-xs text-mist uppercase tracking-wider mb-2">面试官最可能深挖</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {script.meta.focus.map((f, i) => (
+                    <span key={i} className="text-xs px-2 py-1 rounded-full border border-pulse/40 text-pulse bg-pulse/10">{f}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {script.selfIntro?.script && (
+              <div className="rounded-lg border border p-3 bg-void">
+                <div className="text-xs text-mist uppercase tracking-wider mb-2">开场 · 自我介绍（逐字稿）</div>
+                {script.selfIntro.prompt && (
+                  <div className="text-sm text-iron mb-2">面试官：{script.selfIntro.prompt}</div>
+                )}
+                <p className="text-sm text-ink leading-relaxed">{renderWithPlaceholder(script.selfIntro.script)}</p>
+              </div>
+            )}
+
+            {script.rounds?.map((r, ri) => (
+              <div key={ri}>
+                <div className="text-xs text-mist uppercase tracking-wider mb-2">{r.name || `轮次 ${ri + 1}`}</div>
+                <div className="space-y-3">
+                  {r.turns?.map((turn, ti) => (
+                    <div key={ti} className="rounded-lg border border p-3">
+                      <div className="text-[11px] text-iron mb-1.5">Q{ri * 10 + ti + 1}</div>
+                      <div className="text-sm text-ink font-medium mb-2">{turn.question}</div>
+                      <div className="rounded bg-void border border p-2.5">
+                        <div className="text-[11px] text-iron mb-1">参考回答</div>
+                        <p className="text-[13px] text-mist leading-relaxed">{renderWithPlaceholder(turn.answer)}</p>
+                      </div>
+                      {turn.followUps?.length > 0 && (
+                        <div className="mt-2 space-y-2">
+                          {turn.followUps.map((f, fi) => (
+                            <div key={fi} className="rounded border border-dashed border p-2.5 ml-3">
+                              <div className="text-[12px] text-ink font-medium mb-1">追问：{f.question}</div>
+                              <p className="text-[12px] text-iron leading-relaxed">{renderWithPlaceholder(f.answer)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {turn.tip && (
+                        <div className="mt-2 text-[11px] text-ember bg-ember/10 border border-ember/20 rounded p-2">
+                          提示：{turn.tip}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {script.questionsToAsk?.length > 0 && (
+              <div>
+                <div className="text-xs text-mist uppercase tracking-wider mb-2">你的反问（逐字稿）</div>
+                <ul className="space-y-1.5">
+                  {script.questionsToAsk.map((q, i) => (
+                    <li key={i} className="text-[13px] text-ink"><span className="text-pulse mr-1.5">·</span>{q}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {script.pitfalls?.length > 0 && (
+              <div>
+                <div className="text-xs text-mist uppercase tracking-wider mb-2">高风险 / 陷阱题</div>
+                <ul className="space-y-1.5">
+                  {script.pitfalls.map((p, i) => (
+                    <li key={i} className="text-[13px] text-ember"><span className="mr-1.5">▲</span>{p}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {script.tips?.length > 0 && (
+              <div>
+                <div className="text-xs text-mist uppercase tracking-wider mb-2">备考注意</div>
+                <ul className="space-y-1.5">
+                  {script.tips.map((tp, i) => (
+                    <li key={i} className="text-[13px] text-mist"><span className="text-pulse mr-1.5">✓</span>{tp}</li>
                   ))}
                 </ul>
               </div>

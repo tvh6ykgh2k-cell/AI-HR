@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 // 前端类型镜像 server/types.ts 的 M1 部分
 export interface JdAnalysis {
@@ -79,6 +80,37 @@ export interface LayoutResult {
   html: string;
   fileName: string;
   placeholderCount: number;
+  usedTemplate?: boolean;
+  unfilledTokens?: string[];
+}
+
+// 面试逐字稿（M5）
+export interface InterviewFollowUp {
+  question: string;
+  answer: string;
+}
+export interface InterviewTurn {
+  question: string;
+  answer: string;
+  followUps: InterviewFollowUp[];
+  tip?: string;
+}
+export interface InterviewScript {
+  title: string;
+  meta: {
+    duration: string;
+    format: string;
+    focus: string[];
+  };
+  selfIntro: {
+    prompt: string;
+    script: string;
+  };
+  rounds: { name: string; turns: InterviewTurn[] }[];
+  questionsToAsk: string[];
+  pitfalls: string[];
+  tips: string[];
+  sessionId?: string;   // 生成即自动存档到 Obsidian 后的工单号
 }
 
 // 面试准备文档（M4，复用 /api/prep/generate）
@@ -118,6 +150,7 @@ type Phase =
   | 'matching'
   | 'tailoring'
   | 'preparing'
+  | 'interview-script'
   | 'archiving';
 
 interface ResumeState {
@@ -129,7 +162,10 @@ interface ResumeState {
   tailored: TailoredResume | null;
   layout: LayoutResult | null;
   prep: PrepDocument | null;
+  interviewScript: InterviewScript | null;
   archive: ArchiveResult | null;
+  resumeTemplateHtml: string;   // 用户上传的排版模板（.html，含 {{占位符}}），持久化
+  resumeTemplateName: string;   // 模板文件名
   phase: Phase;
   error: string | null;
   setResumeText: (t: string) => void;
@@ -140,37 +176,18 @@ interface ResumeState {
   setTailored: (t: TailoredResume | null) => void;
   setLayout: (l: LayoutResult | null) => void;
   setPrep: (p: PrepDocument | null) => void;
+  setInterviewScript: (s: InterviewScript | null) => void;
   setArchive: (a: ArchiveResult | null) => void;
+  setResumeTemplate: (html: string, name?: string) => void;
+  clearResumeTemplate: () => void;
   setPhase: (p: Phase) => void;
   setError: (e: string | null) => void;
   reset: () => void;
 }
 
-export const useResumeStore = create<ResumeState>((set) => ({
-  resumeText: '',
-  resumeParsed: null,
-  jdText: '',
-  jdAnalysis: null,
-  match: null,
-  tailored: null,
-  layout: null,
-  prep: null,
-  archive: null,
-  phase: 'idle',
-  error: null,
-  setResumeText: (t) => set({ resumeText: t }),
-  setJdText: (t) => set({ jdText: t }),
-  setResumeParsed: (r) => set({ resumeParsed: r }),
-  setJdAnalysis: (a) => set({ jdAnalysis: a }),
-  setMatch: (m) => set({ match: m }),
-  setTailored: (t) => set({ tailored: t }),
-  setLayout: (l) => set({ layout: l }),
-  setPrep: (p) => set({ prep: p }),
-  setArchive: (a) => set({ archive: a }),
-  setPhase: (p) => set({ phase: p }),
-  setError: (e) => set({ error: e }),
-  reset: () =>
-    set({
+export const useResumeStore = create<ResumeState>()(
+  persist(
+    (set) => ({
       resumeText: '',
       resumeParsed: null,
       jdText: '',
@@ -179,8 +196,67 @@ export const useResumeStore = create<ResumeState>((set) => ({
       tailored: null,
       layout: null,
       prep: null,
+      interviewScript: null,
       archive: null,
+      resumeTemplateHtml: '',
+      resumeTemplateName: '',
       phase: 'idle',
       error: null,
+      setResumeText: (t) => set({ resumeText: t }),
+      setJdText: (t) => set({ jdText: t }),
+      setResumeParsed: (r) => set({ resumeParsed: r }),
+      setJdAnalysis: (a) => set({ jdAnalysis: a }),
+      setMatch: (m) => set({ match: m }),
+      setTailored: (t) => set({ tailored: t }),
+      setLayout: (l) => set({ layout: l }),
+      setPrep: (p) => set({ prep: p }),
+      setInterviewScript: (s) => set({ interviewScript: s }),
+      setArchive: (a) => set({ archive: a }),
+      setResumeTemplate: (html, name = '') =>
+        set({ resumeTemplateHtml: html, resumeTemplateName: name }),
+      clearResumeTemplate: () => set({ resumeTemplateHtml: '', resumeTemplateName: '' }),
+      setPhase: (p) => set({ phase: p }),
+      setError: (e) => set({ error: e }),
+      reset: () =>
+        set({
+          resumeText: '',
+          resumeParsed: null,
+          jdText: '',
+          jdAnalysis: null,
+          match: null,
+          tailored: null,
+          layout: null,
+          prep: null,
+          interviewScript: null,
+          archive: null,
+          phase: 'idle',
+          error: null,
+        }),
     }),
-}));
+    {
+      name: 'ai-hr-resume',
+      storage: createJSONStorage(() => localStorage),
+      // 只持久化业务数据；phase/error 是瞬态，恢复时回到 idle
+      partialize: (s) => ({
+        resumeText: s.resumeText,
+        resumeParsed: s.resumeParsed,
+        jdText: s.jdText,
+        jdAnalysis: s.jdAnalysis,
+        match: s.match,
+        tailored: s.tailored,
+        layout: s.layout,
+        prep: s.prep,
+        interviewScript: s.interviewScript,
+        archive: s.archive,
+        resumeTemplateHtml: s.resumeTemplateHtml,
+        resumeTemplateName: s.resumeTemplateName,
+      }),
+      merge: (persisted, current) => ({
+        ...current,
+        ...(persisted as object),
+        phase: 'idle',
+        error: null,
+      }),
+    }
+  )
+);

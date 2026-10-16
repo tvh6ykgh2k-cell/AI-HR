@@ -5,7 +5,10 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cd server && npx tsx watch index.ts",
     "dev:client": "cd client && npx vite --port 5173",
-    "build": "cd client && npx vite build"
+    "start": "cd server && npx tsx index.ts",
+    "build": "cd client && npx vite build",
+    "preview": "cd client && npx vite preview --port 5173",
+    "test": "cd server && npm test"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
